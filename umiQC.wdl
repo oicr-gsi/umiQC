@@ -69,10 +69,10 @@ workflow umiQC {
             }
         ]
         output_meta: {
-            umiCounts: "Record of UMI counts after extraction"
-            extractionMetrics: "Metrics relating to extraction process"
-            preDedupBamMetrics: "BamQC report on bam file pre-deduplication"
-            umiGroups: "File mapping read id to read group"
+            umiCounts: "Record of UMI counts after extraction",
+            extractionMetrics: "Metrics relating to extraction process",
+            preDedupBamMetrics: "BamQC report on bam file pre-deduplication",
+            umiGroups: "File mapping read id to read group",
             postDedupBamMetrics: "BamQC report on bam file post-deduplication"
         }
     }
@@ -172,13 +172,13 @@ task extractUMIs {
 
         meta {
             output_meta: {
-                fastqR1: "Read 1 fastq file with UMIs extracted"
-                fastqR2: "Read 2 fastq file with UMIs extracted"
-                discardR1: "Reads without a matching UMI pattern in read 1"
-                discardR2: "Reads without a matching UMI pattern in read 2"
-                extractR1: "Extracted reads (UMIs and any spacer sequences) from read 1"
-                extractR2: "Extracted reads (UMIs and any spacer sequences) from read 2"
-                umiCounts: "Record of UMI counts after extraction"
+                fastqR1: "Read 1 fastq file with UMIs extracted",
+                fastqR2: "Read 2 fastq file with UMIs extracted",
+                discardR1: "Reads without a matching UMI pattern in read 1",
+                discardR2: "Reads without a matching UMI pattern in read 2",
+                extractR1: "Extracted reads (UMIs and any spacer sequences) from read 1",
+                extractR2: "Extracted reads (UMIs and any spacer sequences) from read 2",
+                umiCounts: "Record of UMI counts after extraction",
                 extractionMetrics: "Metrics relating to extraction process"
             }
         }
@@ -219,7 +219,7 @@ task umiDeduplication {
 
     meta {
         output_meta: {
-            umiDedupBam: "Deduplicated bam file"
+            umiDedupBam: "Deduplicated bam file",
             umiGroups: "File mapping read id to read group"
         }
     }
