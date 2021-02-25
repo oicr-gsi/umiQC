@@ -7,21 +7,21 @@ workflow umiQC {
     input {
         File umiList
         String outputFileNamePrefix = "output"
-        File fastqR1
-        File fastqR2
+        File fastq1
+        File fastq2
     }
 
     parameter_meta {
         umiList: "File with valid UMIs"
         outputFileNamePrefix: "Specifies the start of output files"
-        fastqR1: "Fastq file for read 1"
-        fastqR2: "Fastq file for read 2"
+        fastq1: "Fastq file for read 1"
+        fastq2: "Fastq file for read 2"
     }
 
     meta {
         author: "Michelle Feng"
         email: "mfeng@oicr.on.ca"
-        description: ""
+        description: "QC workflow to assess UMI components"
         dependencies: [
             {
                 name: "barcodex-rs/0.1.2",
@@ -81,8 +81,8 @@ workflow umiQC {
         input:
             umiList = umiList,
             outputFileNamePrefix = outputFileNamePrefix,
-            fastqR1 = fastqR1,
-            fastqR2 = fastqR2
+            fastq1 = fastq1,
+            fastq2 = fastq2
     }
 
     call bwaMem.bwaMem {
@@ -92,7 +92,7 @@ workflow umiQC {
             outputFileNamePrefix = outputFileNamePrefix
     }
 
-    call bamQC.bamQC {
+    call bamQC.bamQC as preDedupBamQC {
         input:
             bamFile = bwaMem.bwaMemBam,
             outputFileNamePrefix = outputFileNamePrefix
@@ -104,7 +104,7 @@ workflow umiQC {
             outputFileNamePrefix = outputFileNamePrefix
     }
 
-    call bamQC.bamQC {
+    call bamQC.bamQC as postDedupBamQC {
         input:
             bamFile = umiDeduplication.umiDedupBam,
             outputFileNamePrefix = outputFileNamePrefix
@@ -116,21 +116,22 @@ workflow umiQC {
         File extractionMetrics = extractUMIs.extractionMetrics
 
         # pre-collapse bamqc metrics
-        File preDedupBamMetrics = bamQC.result
+        File preDedupBamMetrics = preDedupBamQC.result
 
         # umi-tools metrics
         File umiGroups = umiDeduplication.umiGroups
 
         # post-collapse bamqc metrics
-        File postDedupBamMetrics = bamQC.result
-    }
+        File postDedupBamMetrics = postDedupBamQC.result
+    } 
+}
 
-    task extractUMIs {
+task extractUMIs {
         input {
             File umiList
             String outputFileNamePrefix
-            File fastqR1
-            File fastqR2
+            File fastq1
+            File fastq2
             String modules = "barcodex-rs/0.1.2 rust/1.45.1"
             Int memory = 24
             Int timeout = 12
@@ -148,8 +149,8 @@ workflow umiQC {
 
         command <<<
             barcodex-rs --umilist ~{umiList} --outputFileNamePrefix ~{outputFileNamePrefix} --separator "__" inline \
-            --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastqR1} \
-            --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastqR2} 
+            --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
+            --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastq2} 
         >>>
 
         runtime {
@@ -183,42 +184,43 @@ workflow umiQC {
         }
     }
 
-    task umiDeduplication {
-        input {
-            File bamFile
-            File outputFileNamePrefix
-            String modules = "umi-tools/1.0.0"
-            Int memory = 24
-            Int timeout = 6
-        }
+task umiDeduplication {
+    input {
+        File bamFile
+        File outputFileNamePrefix
+        String modules = "umi-tools/1.0.0"
+        Int memory = 24
+        Int timeout = 6
+    }
 
-        parameter_meta {
-            modules: "Required environment modules"
-            memory: "Memory allocated for this job"
-            timeout: "Time in hours before task timeout"
-        }
+    parameter_meta {
+        bamFile: "Pre-deduplicated bam file"
+        outputFileNamePrefix: "Specifies the start of the output files"
+        modules: "Required environment modules"
+        memory: "Memory allocated for this job"
+        timeout: "Time in hours before task timeout"
+    }
 
-        command <<<
-            umi_tools group -I ~{bamFile} \
-            --group-out=~{outputFileNamePrefix}.umi_groups.tsv \
-            --output-bam > ~{outputFileNamePrefix}.dedup.bam
-        >>>
+    command <<<
+        umi_tools group -I ~{bamFile} \
+        --group-out=~{outputFileNamePrefix}.umi_groups.tsv \
+        --output-bam > ~{outputFileNamePrefix}.dedup.bam
+    >>>
 
-        runtime {
-            memory: "~{memory}G"
-            timeout: "~{timeout}"
-        }
+    runtime {
+        memory: "~{memory}G"
+        timeout: "~{timeout}"
+    }
 
-        output {
-            File umiDedupBam = "~{outputFileNamePrefix}.dedup.bam"
-            File umiGroups = "~{outputFileNamePrefix}.umi_groups.tsv"
-        }
+    output {
+        File umiDedupBam = "~{outputFileNamePrefix}.dedup.bam"
+        File umiGroups = "~{outputFileNamePrefix}.umi_groups.tsv"
+    }
 
-        meta {
-            output_meta: {
-                umiDedupBam: "Deduplicated bam file"
-                umiGroups: "File mapping read id to read group"
-            }
+    meta {
+        output_meta: {
+            umiDedupBam: "Deduplicated bam file"
+            umiGroups: "File mapping read id to read group"
         }
     }
 }
