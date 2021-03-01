@@ -164,8 +164,8 @@ task extractUMIs {
             File fastqR2 = "~{outputPrefix}_R2.fastq.gz"
             File discardR1 = "~{outputPrefix}_R1.discarded.fastq.gz"
             File discardR2 = "~{outputPrefix}_R2.discarded.fastq.gz"
-            File extractR1 = "~{outputPrefix}_R1.extractedfastq.gz"
-            File extractR2 = "~{outputPrefix}_R2.extractedfastq.gz"
+            File extractR1 = "~{outputPrefix}_R1.extracted.fastq.gz"
+            File extractR2 = "~{outputPrefix}_R2.extracted.fastq.gz"
             File umiCounts = "~{outputPrefix}_UMI_counts.json"
             File extractionMetrics = "~{outputPrefix}_extraction_metrics.json"
         }
