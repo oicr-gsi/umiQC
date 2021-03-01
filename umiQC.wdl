@@ -6,14 +6,14 @@ import "imports/pull_bamQC.wdl" as bamQC
 workflow umiQC {
     input {
         File umiList
-        String outputFileNamePrefix = "output"
+        String outputPrefix = "output"
         File fastq1
         File fastq2
     }
 
     parameter_meta {
         umiList: "File with valid UMIs"
-        outputFileNamePrefix: "Specifies the start of output files"
+        outputPrefix: "Specifies the start of output files"
         fastq1: "Fastq file for read 1"
         fastq2: "Fastq file for read 2"
     }
@@ -80,7 +80,7 @@ workflow umiQC {
     call extractUMIs { 
         input:
             umiList = umiList,
-            outputFileNamePrefix = outputFileNamePrefix,
+            outputPrefix = outputPrefix,
             fastq1 = fastq1,
             fastq2 = fastq2
     }
@@ -89,25 +89,25 @@ workflow umiQC {
         input:
             fastqR1 = extractUMIs.fastqR1,
             fastqR2 = extractUMIs.fastqR2,
-            outputFileNamePrefix = outputFileNamePrefix
+            outputFileNamePrefix = outputPrefix
     }
 
     call bamQC.bamQC as preDedupBamQC {
         input:
             bamFile = bwaMem.bwaMemBam,
-            outputFileNamePrefix = outputFileNamePrefix
+            outputFileNamePrefix = outputPrefix
     }
 
     call umiDeduplication {
         input:
             bamFile = bwaMem.bwaMemBam,
-            outputFileNamePrefix = outputFileNamePrefix
+            outputPrefix = outputPrefix
     }
 
     call bamQC.bamQC as postDedupBamQC {
         input:
             bamFile = umiDeduplication.umiDedupBam,
-            outputFileNamePrefix = outputFileNamePrefix
+            outputFileNamePrefix = outputPrefix
     }
 
     output {
@@ -129,7 +129,7 @@ workflow umiQC {
 task extractUMIs {
         input {
             File umiList
-            String outputFileNamePrefix
+            String outputPrefix
             File fastq1
             File fastq2
             String modules = "barcodex-rs/0.1.2 rust/1.45.1"
@@ -139,7 +139,7 @@ task extractUMIs {
 
         parameter_meta {
             umiList: "File with valid UMIs"
-            outputFileNamePrefix: "Specifies the start of the output files"
+            outputPrefix: "Specifies the start of the output files"
             fastqR1: "FASTQ file containing read 1"
             fastqR2: "FASTQ file containing read 2"
             modules: "Required environment modules"
@@ -148,7 +148,10 @@ task extractUMIs {
         }
 
         command <<<
-            barcodex-rs --umilist ~{umiList} --prefix ~{outputFileNamePrefix} --separator "__" inline \
+            cargo build --release
+            sudo cp target/release/barcodex-rs /usr/local/bin
+
+            barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
             --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
             --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastq2} 
         >>>
@@ -160,14 +163,14 @@ task extractUMIs {
         }
 
         output {
-            File fastqR1 = "~{outputFileNamePrefix}_R1.fastq.gz"
-            File fastqR2 = "~{outputFileNamePrefix}_R2.fastq.gz"
-            File discardR1 = "~{outputFileNamePrefix}_R1.discarded.fastq.gz"
-            File discardR2 = "~{outputFileNamePrefix}_R2.discarded.fastq.gz"
-            File extractR1 = "~{outputFileNamePrefix}_R1.extractedfastq.gz"
-            File extractR2 = "~{outputFileNamePrefix}_R2.extractedfastq.gz"
-            File umiCounts = "~{outputFileNamePrefix}_UMI_counts.json"
-            File extractionMetrics = "~{outputFileNamePrefix}_extraction_metrics.json"
+            File fastqR1 = "~{outputPrefix}_R1.fastq.gz"
+            File fastqR2 = "~{outputPrefix}_R2.fastq.gz"
+            File discardR1 = "~{outputPrefix}_R1.discarded.fastq.gz"
+            File discardR2 = "~{outputPrefix}_R2.discarded.fastq.gz"
+            File extractR1 = "~{outputPrefix}_R1.extractedfastq.gz"
+            File extractR2 = "~{outputPrefix}_R2.extractedfastq.gz"
+            File umiCounts = "~{outputPrefix}_UMI_counts.json"
+            File extractionMetrics = "~{outputPrefix}_extraction_metrics.json"
         }
 
         meta {
@@ -187,7 +190,7 @@ task extractUMIs {
 task umiDeduplication {
     input {
         File bamFile
-        File outputFileNamePrefix
+        File outputPrefix
         String modules = "umi-tools/1.0.0"
         Int memory = 24
         Int timeout = 6
@@ -195,7 +198,7 @@ task umiDeduplication {
 
     parameter_meta {
         bamFile: "Pre-deduplicated bam file"
-        outputFileNamePrefix: "Specifies the start of the output files"
+        outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
         timeout: "Time in hours before task timeout"
@@ -203,8 +206,8 @@ task umiDeduplication {
 
     command <<<
         umi_tools group -I ~{bamFile} \
-        --group-out=~{outputFileNamePrefix}.umi_groups.tsv \
-        --output-bam > ~{outputFileNamePrefix}.dedup.bam
+        --group-out=~{outputPrefix}.umi_groups.tsv \
+        --output-bam > ~{outputPrefix}.dedup.bam
     >>>
 
     runtime {
@@ -213,8 +216,8 @@ task umiDeduplication {
     }
 
     output {
-        File umiDedupBam = "~{outputFileNamePrefix}.dedup.bam"
-        File umiGroups = "~{outputFileNamePrefix}.umi_groups.tsv"
+        File umiDedupBam = "~{outputPrefix}.dedup.bam"
+        File umiGroups = "~{outputPrefix}.umi_groups.tsv"
     }
 
     meta {
