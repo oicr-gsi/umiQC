@@ -148,8 +148,7 @@ task extractUMIs {
         }
 
         command <<<
-            cargo build --release
-            sudo cp target/release/barcodex-rs /usr/local/bin
+            export RUST_BACKTRACE=1
 
             barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
             --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
