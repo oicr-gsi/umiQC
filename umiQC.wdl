@@ -188,7 +188,7 @@ task umiDeduplication {
     input {
         File bamFile
         File outputPrefix
-        String modules = "umi-tools/1.0.0"
+        String modules = "umi-tools/1.0.0 samtools/1.9"
         Int memory = 24
         Int timeout = 6
     }
@@ -202,9 +202,12 @@ task umiDeduplication {
     }
 
     command <<<
+        samtools index ~{bamFile}
+
         umi_tools group -I ~{bamFile} \
         --group-out=~{outputPrefix}.umi_groups.tsv \
-        --output-bam > ~{outputPrefix}.dedup.bam
+        --output-bam > ~{outputPrefix}.dedup.bam \
+        --log=group.log --paired | samtools view
     >>>
 
     runtime {
