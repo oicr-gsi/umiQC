@@ -217,8 +217,6 @@ task bamSplit {
     }
 
     command <<<
-        module load samtools/1.9
-
         samtools view -H ~{bamFile} > ~{outputPrefixSix}.sam
         samtools view ~{bamFile} | grep -P "^.*__\S{6}\t" >> ~{outputPrefixSix}.sam
         samtools view -Sb ~{outputPrefixSix}.sam > ~{outputPrefixSix}.bam
@@ -233,6 +231,7 @@ task bamSplit {
     >>>
 
     runtime {
+        modules: "~{modules}"
         memory: "~{memory}G"
         timeout: "~{timeout}"
     }
@@ -306,6 +305,7 @@ task umiDeduplications {
     >>>
 
     runtime {
+        modules: "~{modules}"
         memory: "~{memory}G"
         timeout: "~{timeout}"
     }
