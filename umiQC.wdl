@@ -217,6 +217,8 @@ task bamSplit {
     }
 
     command <<<
+        module load samtools/1.9
+
         samtools view -H ~{bamFile} > ~{outputPrefixSix}.sam
         samtools view ~{bamFile} | grep -P "^.*__\S{6}\t" >> ~{outputPrefixSix}.sam
         samtools view -Sb ~{outputPrefixSix}.sam > ~{outputPrefixSix}.bam
@@ -239,6 +241,14 @@ task bamSplit {
         File outputSix = "~{outputPrefixSix}.bam"
         File outputSeven = "~{outputPrefixSeven}.bam"
         File outputEight = "~{outputPrefixEight}.bam"
+    }
+
+    meta {
+        output_meta: {
+            outputSix: "UMIs with length six",
+            outputSeven: "UMIs with length seven",
+            outputEight: "UMIs with length eight"
+        }
     }
 }
 
