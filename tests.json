@@ -46,7 +46,8 @@
             "umiQC.postDedupBamQC.bamQCMetrics_refFasta": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa",
             "umiQC.postDedupBamQC.bamQCMetrics_refSizesBed": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19.chrom.sizes.bed",
             "umiQC.extractUMIs.modules": "barcodex-rs/0.1.2 rust/1.45.1",
-            "umiQC.umiDeduplications.modules": "umi-tools/1.0.0"
+            "umiQC.bamSplit.modules": "samtools/1.9",
+            "umiQC.umiDeduplications.modules": "umi-tools/1.0.0 samtools/1.9"
           }
         }
       }
