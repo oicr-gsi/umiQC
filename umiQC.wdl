@@ -198,9 +198,9 @@ task extractUMIs {
 task bamSplit {
     input {
         File bamFile
-        File outputPrefixSix = "output.6"
-        File outputPrefixSeven = "output.7"
-        File outputPrefixEight = "output.8"
+        String outputPrefixSix = "output.6"
+        String outputPrefixSeven = "output.7"
+        String outputPrefixEight = "output.8"
         String modules = "samtools/1.9"
         Int memory = 24
         Int timeout = 6
@@ -247,10 +247,10 @@ task umiDeduplications {
         File umiSix
         File umiSeven
         File umiEight
-        File outputPrefixSix = "output.6"
-        File outputPrefixSeven = "output.7"
-        File outputPrefixEight = "output.8"
-        File outputPrefix
+        String outputPrefixSix = "output.6"
+        String outputPrefixSeven = "output.7"
+        String outputPrefixEight = "output.8"
+        String outputPrefix
         String modules = "umi-tools/1.0.0 samtools/1.9"
         Int memory = 24
         Int timeout = 6
