@@ -18,8 +18,8 @@
       "wdl_deps_zip": "${workflow_bundle_dir}/Workflow_Bundle_umiQCWorkflow/1.0/lib/imports.zip",
           "wdl_inputs": {
             "umiQC.umiList": "/.mounts/labs/gsi/testdata/umiQC/IDT_true_barcodes.txt",
-            "umiQC.fastq1": "/.mounts/labs/gsi/testdata/umiQC/inputs/testR1.fastq",
-            "umiQC.fastq2": "/.mounts/labs/gsi/testdata/umiQC/inputs/testR2.fastq",
+            "umiQC.fastq1": "/.mounts/labs/gsi/testdata/umiQC/inputs/r1.fastq",
+            "umiQC.fastq2": "/.mounts/labs/gsi/testdata/umiQC/inputs/r2.fastq",
             "umiQC.bwaMem.readGroups": "'@RG\\tID:1\\tLB:neat_5x_EX_hg19_golden\\tPL:illumina\\tPU:run_barcode\\tSM:neat_5x_EX_hg19_golden'",
             "umiQC.bwaMem.runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg19-bwa-index/0.7.12",
             "umiQC.bwaMem.runBwaMem_bwaRef": "$HG19_BWA_INDEX_ROOT/hg19_random.fa",
