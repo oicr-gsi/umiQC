@@ -72,7 +72,9 @@ workflow umiQC {
             umiCounts: "Record of UMI counts after extraction",
             extractionMetrics: "Metrics relating to extraction process",
             preDedupBamMetrics: "BamQC report on bam file pre-deduplication",
-            umiGroups: "File mapping read id to read group",
+            umiMetricsSix: "File mapping read id to read group",
+            umiMetricsSeven: "File mapping read id to read group",
+            umiMetricsEight: "File mapping read id to read group",
             postDedupBamMetrics: "BamQC report on bam file post-deduplication"
         }
     }
@@ -98,15 +100,22 @@ workflow umiQC {
             outputFileNamePrefix = outputPrefix
     }
 
-    call umiDeduplication {
+    call bamSplit {
         input:
-            bamFile = bwaMem.bwaMemBam,
-            outputPrefix = outputPrefix
+            bamFile = bwaMem.bwaMemBam
+    }
+
+    call umiDeduplications {
+        input:
+            outputPrefix = outputPrefix,
+            umiSix = bamSplit.outputSix,
+            umiSeven = bamSplit.outputSeven,
+            umiEight = bamSplit.outputEight
     }
 
     call bamQC.bamQC as postDedupBamQC {
         input:
-            bamFile = umiDeduplication.umiDedupBam,
+            bamFile = umiDeduplications.umiDedupBam,
             outputFileNamePrefix = outputPrefix
     }
 
@@ -119,7 +128,9 @@ workflow umiQC {
         File preDedupBamMetrics = preDedupBamQC.result
 
         # umi-tools metrics
-        File umiGroups = umiDeduplication.umiGroups
+        File umiMetricsSix = umiDeduplications.umiMetricsSix
+        File umiMetricsSeven = umiDeduplications.umiMetricsSeven
+        File umiMetricsEight = umiDeduplications.umiMetricsEight
 
         # post-collapse bamqc metrics
         File postDedupBamMetrics = postDedupBamQC.result
@@ -184,9 +195,61 @@ task extractUMIs {
         }
     }
 
-task umiDeduplication {
+task bamSplit {
     input {
         File bamFile
+        File outputPrefixSix = "output.6"
+        File outputPrefixSeven = "output.7"
+        File outputPrefixEight = "output.8"
+        String modules = "samtools/1.9"
+        Int memory = 24
+        Int timeout = 6
+    }
+
+    parameter_meta {
+        bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
+        outputPrefixSix: "Specifies the start of the output files"
+        outputPrefixSeven: "Specifies the start of the output files"
+        outputPrefixEight: "Specifies the start of the output files"
+        modules: "Required environment modules"
+        memory: "Memory allocated for this job"
+        timeout: "Time in hours before task timeout"
+    }
+
+    command <<<
+        samtools view -H ~{bamFile} > ~{outputPrefixSix}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\S{6}\t" >> ~{outputPrefixSix}.sam
+        samtools view -Sb ~{outputPrefixSix}.sam > ~{outputPrefixSix}.bam
+
+        samtools view -H ~{bamFile} > ~{outputPrefixSeven}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\S{7}\t" >> ~{outputPrefixSeven}.sam
+        samtools view -Sb ~{outputPrefixSeven}.sam > ~{outputPrefixSeven}.bam
+
+        samtools view -H ~{bamFile} > ~{outputPrefixEight}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\S{8}\t" >> ~{outputPrefixEight}.sam
+        samtools view -Sb ~{outputPrefixEight}.sam > ~{outputPrefixEight}.bam
+    >>>
+
+    runtime {
+        memory: "~{memory}G"
+        timeout: "~{timeout}"
+    }
+
+    output {
+        File outputSix = "~{outputPrefixSix}.bam"
+        File outputSeven = "~{outputPrefixSeven}.bam"
+        File outputEight = "~{outputPrefixEight}.bam"
+    }
+}
+
+task umiDeduplications {
+    input {
+        File umiSix
+        File umiSeven
+        File umiEight
+        File outputPrefixSix = "output.6"
+        File outputPrefixSeven = "output.7"
+        File outputPrefixEight = "output.8"
         File outputPrefix
         String modules = "umi-tools/1.0.0 samtools/1.9"
         Int memory = 24
@@ -194,7 +257,12 @@ task umiDeduplication {
     }
 
     parameter_meta {
-        bamFile: "Pre-deduplicated bam file"
+        umiSix: "Bam file with UMIs of length six"
+        umiSeven: "Bam file with UMIs of length seven"
+        umiEight: "Bam file with UMIs of length eight"
+        outputPrefixSix: "Specifies the start of the output files"
+        outputPrefixSeven: "Specifies the start of the output files"
+        outputPrefixEight: "Specifies the start of the output files"
         outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
@@ -202,12 +270,29 @@ task umiDeduplication {
     }
 
     command <<<
-        samtools index ~{bamFile}
+        samtools index ~{umiSix}
+        samtools index ~{umiSeven}
+        samtools index ~{umiEight}
 
-        umi_tools group -I ~{bamFile} \
-        --group-out=~{outputPrefix}.umi_groups.tsv \
-        --output-bam > ~{outputPrefix}.dedup.bam \
+        umi_tools group -I ~{umiSix} \
+        --group-out=~{outputPrefixSix}.umi_groups.tsv \
+        --output-bam > ~{outputPrefixSix}.dedup.bam \
         --log=group.log --paired | samtools view
+
+        umi_tools group -I ~{umiSeven} \
+        --group-out=~{outputPrefixSeven}.umi_groups.tsv \
+        --output-bam > ~{outputPrefixSeven}.dedup.bam \
+        --log=group.log --paired | samtools view
+
+        umi_tools group -I ~{umiEight} \
+        --group-out=~{outputPrefixEight}.umi_groups.tsv \
+        --output-bam > ~{outputPrefixEight}.dedup.bam \
+        --log=group.log --paired | samtools view
+
+        samtools merge ~{outputPrefix}.dedup.bam \
+        ~{outputPrefixSix}.dedup.bam \
+        ~{outputPrefixSeven}.dedup.bam \
+        ~{outputPrefixEight}.dedup.bam
     >>>
 
     runtime {
@@ -217,13 +302,17 @@ task umiDeduplication {
 
     output {
         File umiDedupBam = "~{outputPrefix}.dedup.bam"
-        File umiGroups = "~{outputPrefix}.umi_groups.tsv"
+        File umiMetricsSix = "~{outputPrefixSix}.umi_groups.tsv"
+        File umiMetricsSeven = "~{outputPrefixSeven}.umi_groups.tsv"
+        File umiMetricsEight = "~{outputPrefixEight}.umi_groups.tsv"
     }
 
     meta {
         output_meta: {
             umiDedupBam: "Deduplicated bam file",
-            umiGroups: "File mapping read id to read group"
+            umiMetricsSix: "File mapping read id to read group",
+            umiMetricsSeven: "File mapping read id to read group",
+            umiMetricsEight: "File mapping read id to read group"
         }
     }
 }
