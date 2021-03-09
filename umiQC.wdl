@@ -97,7 +97,7 @@ workflow umiQC {
     call bamQC.bamQC as preDedupBamQC {
         input:
             bamFile = bwaMem.bwaMemBam,
-            outputFileNamePrefix = outputPrefix
+            outputFileNamePrefix = "preDedup"
     }
 
     call bamSplit {
@@ -116,7 +116,7 @@ workflow umiQC {
     call bamQC.bamQC as postDedupBamQC {
         input:
             bamFile = umiDeduplications.umiDedupBam,
-            outputFileNamePrefix = outputPrefix
+            outputFileNamePrefix = "postDedup"
     }
 
     output {
