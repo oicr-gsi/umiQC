@@ -1,10 +1,8 @@
-#!/bin/bash
-set -o nounset
-set -o errexit
-set -o pipefail
+find . \( -type f -size +0 -iname "output.6.umi_groups.tsv" \) -printf "output.6 umi_groups file exists\n";
+find . \( -type f -size +0 -iname "output.7.umi_groups.tsv" \) -printf "output.7 umi_groups file exists\n";
+find . \( -type f -size +0 -iname "output.8.umi_groups.tsv" \) -printf "output.8 umi_groups file exists\n";
+find . \( -type f -size +0 -iname "output_extraction_metrics.json" \) -printf "extraction metrics file exists\n";
+find . \( -type f -size +0 -iname "preDedup.bamQC_results.json" \) -printf "preDedup bamQC file exists\n";
+find . \( -type f -size +0 -iname "postDedup.bamQC_results.json" \) -printf "postDedup bamQC file exists\n";
+find . \( -type f -size +0 -iname "output_UMI_counts.json" \) -printf "UMI_counts file exists\n";
 
-#enter the workflow's final output directory ($1)
-cd $1
-
-#find all files, return their md5sums to std out
-find . -type f -exec md5sum {} +
