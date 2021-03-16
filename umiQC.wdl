@@ -225,69 +225,6 @@ task bamSplit {
     }
 
     command <<<
-        samtools view -H ~{bamFile} > ~{outputPrefixSix}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\S{6}\t" >> ~{outputPrefixSix}.sam
-        samtools view -Sb ~{outputPrefixSix}.sam > ~{outputPrefixSix}.bam
-
-        samtools view -H ~{bamFile} > ~{outputPrefixSeven}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\S{7}\t" >> ~{outputPrefixSeven}.sam
-        samtools view -Sb ~{outputPrefixSeven}.sam > ~{outputPrefixSeven}.bam
-
-        samtools view -H ~{bamFile} > ~{outputPrefixEight}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\S{8}\t" >> ~{outputPrefixEight}.sam
-        samtools view -Sb ~{outputPrefixEight}.sam > ~{outputPrefixEight}.bam
-    >>>
-
-    runtime {
-        modules: "~{modules}"
-        memory: "~{memory}G"
-        timeout: "~{timeout}"
-    }
-
-    output {
-        File outputSix = "~{outputPrefixSix}.bam"
-        File outputSeven = "~{outputPrefixSeven}.bam"
-        File outputEight = "~{outputPrefixEight}.bam"
-    }
-
-    meta {
-        output_meta: {
-            outputSix: "UMIs with length six",
-            outputSeven: "UMIs with length seven",
-            outputEight: "UMIs with length eight"
-        }
-    }
-}
-
-task umiDeduplications {
-    input {
-        File umiSix
-        File umiSeven
-        File umiEight
-        String outputPrefixSix = "output.6"
-        String outputPrefixSeven = "output.7"
-        String outputPrefixEight = "output.8"
-        String outputPrefix
-        String modules = "umi-tools/1.0.0 samtools/1.9"
-        Int memory = 24
-        Int timeout = 6
-    }
-
-    parameter_meta {
-        bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
-        umiSix: "Bam file with UMIs of length six"
-        umiSeven: "Bam file with UMIs of length seven"
-        umiEight: "Bam file with UMIs of length eight"
-        outputPrefixSix: "Specifies the start of the output files"
-        outputPrefixSeven: "Specifies the start of the output files"
-        outputPrefixEight: "Specifies the start of the output files"
-        outputPrefix: "Specifies the start of the output files"
-        modules: "Required environment modules"
-        memory: "Memory allocated for this job"
-        timeout: "Time in hours before task timeout"
-    }
-
-    command <<<
         set -euo pipefail
 
         samtools view -H ~{bamFile} > ~{outputPrefixSix}.sam
