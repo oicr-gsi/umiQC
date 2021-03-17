@@ -218,10 +218,10 @@ task bamSplit {
 
     command <<<
         set -euo pipefail
-
-        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + minLength}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACTG]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength + minLength}.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength + minLength}.sam > ~{outputPrefix}.~{minLength + minLength}.bam
+        
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength * 2}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACTG]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength * 2}.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam > ~{outputPrefix}.~{minLength * 2}.bam
 
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
@@ -231,9 +231,9 @@ task bamSplit {
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
         samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength + maxLength}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength + maxLength}.sam
-        samtools view -Sb ~{outputPrefix}.~{maxLength + maxLength}.sam > ~{outputPrefix}.~{maxLength + maxLength}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength * 2}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength * 2}.sam
+        samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam > ~{outputPrefix}.~{maxLength * 2}.bam
     >>>
 
     runtime {
