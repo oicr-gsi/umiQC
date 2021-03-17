@@ -9,7 +9,6 @@ workflow umiQC {
         String outputPrefix = "output"
         File fastq1
         File fastq2
-        differentLengths = true
     }
 
     parameter_meta {
@@ -73,9 +72,9 @@ workflow umiQC {
             umiCounts: "Record of UMI counts after extraction",
             extractionMetrics: "Metrics relating to extraction process",
             preDedupBamMetrics: "BamQC report on bam file pre-deduplication",
-            umiMetricsSix: "File mapping read id to read group",
-            umiMetricsSeven: "File mapping read id to read group",
-            umiMetricsEight: "File mapping read id to read group",
+            umiMetrics1: "File mapping read id to read group",
+            umiMetrics2: "File mapping read id to read group",
+            umiMetrics3: "File mapping read id to read group",
             postDedupBamMetrics: "BamQC report on bam file post-deduplication"
         }
     }
@@ -101,27 +100,23 @@ workflow umiQC {
             outputFileNamePrefix = "preDedup"
     }
 
-    if (differentLengths == true) {
-        call bamSplit {
-        input:
-            bamFile = bwaMem.bwaMemBam
-        }
+    call bamSplit {
+    input:
+        bamFile = bwaMem.bwaMemBam
     }
 
     call umiDeduplications {
     input:
         outputPrefix = outputPrefix,
-        umiSix = bamSplit.outputSix,
-        umiSeven = bamSplit.outputSeven,
-        umiEight = bamSplit.outputEight
-    }
-    
-    call bamQC.bamQC as postDedupBamQC {
-        input:
-            bamFile = umiDeduplications.umiDedupBam,
-            outputFileNamePrefix = "postDedup"
+        bamFiles = bamSplit.bamFiles
     }
 
+    call bamQC.bamQC as postDedupBamQC {
+    input:
+        bamFile = umiDeduplications.umiDedupBam,
+        outputFileNamePrefix = "postDedup"
+    }
+    
     output {
         # barcodex metrics
         File umiCounts = extractUMIs.umiCounts
@@ -131,9 +126,9 @@ workflow umiQC {
         File preDedupBamMetrics = preDedupBamQC.result
 
         # umi-tools metrics
-        File umiMetricsSix = umiDeduplications.umiMetricsSix
-        File umiMetricsSeven = umiDeduplications.umiMetricsSeven
-        File umiMetricsEight = umiDeduplications.umiMetricsEight
+        File umiMetrics1 = umiDeduplications.umiMetrics1
+        File umiMetrics2 = umiDeduplications.umiMetrics2
+        File umiMetrics3 = umiDeduplications.umiMetrics3
 
         # post-collapse bamqc metrics
         File postDedupBamMetrics = postDedupBamQC.result
@@ -201,14 +196,11 @@ task extractUMIs {
     }
 
 task bamSplit {
-    # bamSplit is only called if the BAM file contains UMIs of different lengths
-
     input {
         File bamFile
-        String outputPrefixSix = "output.6"
-        String outputPrefixSeven = "output.7"
-        String outputPrefixEight = "output.8"
-        Boolean differentLengths = true
+        String outputPrefix = "output"
+        Int minLength = 3
+        Int maxLength = 4
         String modules = "samtools/1.9"
         Int memory = 24
         Int timeout = 6
@@ -216,9 +208,9 @@ task bamSplit {
 
     parameter_meta {
         bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
-        outputPrefixSix: "Specifies the start of the output files"
-        outputPrefixSeven: "Specifies the start of the output files"
-        outputPrefixEight: "Specifies the start of the output files"
+        outputPrefix: "Specifies the start of the output files"
+        minLength: "Minimum length of the barcode"
+        maxLength: "Maximum length of the barcode"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
         timeout: "Time in hours before task timeout"
@@ -227,21 +219,21 @@ task bamSplit {
     command <<<
         set -euo pipefail
 
-        samtools view -H ~{bamFile} > ~{outputPrefixSix}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{3}\.\[ACTG]{3}\t" >> ~{outputPrefixSix}.sam
-        samtools view -Sb ~{outputPrefixSix}.sam > ~{outputPrefixSix}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + minLength}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{minLength}\.\[ACTG]{minLength}\t" >> ~{outputPrefix}.~{minLength + minLength}.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + minLength}.sam > ~{outputPrefix}.~{minLength + minLength}.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefixSeven}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{3}\.\[ACGT]{4}\t" >> ~{outputPrefixSeven}.sam
-        samtools view -Sb ~{outputPrefixSeven}.sam > ~{outputPrefixSeven}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{minLength}\.\[ACGT]{maxLength}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefixSeven}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{4}\.\[ACGT]{3}\t" >> ~{outputPrefixSeven}.sam
-        samtools view -Sb ~{outputPrefixSeven}.sam > ~{outputPrefixSeven}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{maxLength}\.\[ACGT]{minLength}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefixEight}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{4}\.\[ACGT]{4}\t" >> ~{outputPrefixEight}.sam
-        samtools view -Sb ~{outputPrefixEight}.sam > ~{outputPrefixEight}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength + maxLength}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{maxLength}\.\[ACGT]{maxLength}\t" >> ~{outputPrefix}.~{maxLength + maxLength}.sam
+        samtools view -Sb ~{outputPrefix}.~{maxLength + maxLength}.sam > ~{outputPrefix}.~{maxLength + maxLength}.bam
     >>>
 
     runtime {
@@ -251,45 +243,29 @@ task bamSplit {
     }
 
     output {
-        File outputSix = "~{outputPrefixSix}.bam"
-        File outputSeven = "~{outputPrefixSeven}.bam"
-        File outputEight = "~{outputPrefixEight}.bam"
         Array[File] bamFiles = glob("*.bam")
     }
 
     meta {
         output_meta: {
-            outputSix: "UMIs with length six",
-            outputSeven: "UMIs with length seven",
-            outputEight: "UMIs with length eight"
+            bamFiles: "Array of BAM files containing UMIs of varying lengths"
         }
     }
 }
 
 task umiDeduplications {
     input {
-        File umiSix
-        File umiSeven
-        File umiEight
-        Array[File]? bamFiles
-        File? bamFile
-        String outputPrefixSix = "output.6"
-        String outputPrefixSeven = "output.7"
-        String outputPrefixEight = "output.8"
+        Array[File] bamFiles
         String outputPrefix
+        Int minLength = 3
+        Int maxLength = 4
         String modules = "umi-tools/1.0.0 samtools/1.9"
         Int memory = 24
         Int timeout = 6
     }
 
     parameter_meta {
-        umiSix: "Bam file with UMIs of length six"
-        umiSeven: "Bam file with UMIs of length seven"
-        umiEight: "Bam file with UMIs of length eight"
         bamFiles: "Array of BAM files containing UMIs of varying lengths"
-        outputPrefixSix: "Specifies the start of the output files"
-        outputPrefixSeven: "Specifies the start of the output files"
-        outputPrefixEight: "Specifies the start of the output files"
         outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
@@ -297,29 +273,21 @@ task umiDeduplications {
     }
 
     command <<<
-        set -exo pipefail
+        set -euo pipefail
 
-        if ~{differentLengths} ; then
-            for x in ~{sep=' ' bamFiles}
-            do
-                samtools index "${x}"
-                umi_tools group -I "${x} \
-                --group-out=$(basename "${x}).umi_groups.tsv \
-                --output-bam > $(basename "${x}").dedup.bam \
-                --log=group.log --paired | samtools view
-            done;
-
-            samtools merge ~{outputPrefix}.dedup.bam \
-            ~{outputPrefixSix}.dedup.bam \
-            ~{outputPrefixSeven}.dedup.bam \
-            ~{outputPrefixEight}.dedup.bam
-        else
-            samtools index ~{bamFile}
-            umi_tools group -I ~{bamFile} \
-            --group-out=~{outputPrefix}.umi_groups.tsv \
-            --output-bam > ~{outputPrefix}/dedup.bam \
+        for x in ~{sep=' ' bamFiles}
+        do
+            samtools index "${x}"
+            umi_tools group -I "${x} \
+            --group-out=$(basename "${x}).umi_groups.tsv \
+            --output-bam > $(basename "${x}").dedup.bam \
             --log=group.log --paired | samtools view
-        fi
+        done;
+
+        samtools merge ~{outputPrefix}.dedup.bam \
+        ~{outputPrefix}.~{minLength + minLength}.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.dedup.bam \
+        ~{outputPrefix}.~{maxLength + maxLength}.dedup.bam
     >>>
 
     runtime {
@@ -330,17 +298,17 @@ task umiDeduplications {
 
     output {
         File umiDedupBam = "~{outputPrefix}.dedup.bam"
-        File umiMetricsSix = "~{outputPrefixSix}.umi_groups.tsv"
-        File umiMetricsSeven = "~{outputPrefixSeven}.umi_groups.tsv"
-        File umiMetricsEight = "~{outputPrefixEight}.umi_groups.tsv"
+        File umiMetrics1 = "~{outputPrefix}.~{minLength + minLength}.umi_groups.tsv"
+        File umiMetrics2 = "~{outputPrefix}.~{minLength + maxLength}.umi_groups.tsv"
+        File umiMetrics3 = "~{outputPrefix}.{maxLength + maxLength}.umi_groups.tsv"
     }
 
     meta {
         output_meta: {
             umiDedupBam: "Deduplicated bam file",
-            umiMetricsSix: "File mapping read id to read group",
-            umiMetricsSeven: "File mapping read id to read group",
-            umiMetricsEight: "File mapping read id to read group"
+            umiMetrics1: "File mapping read id to read group",
+            umiMetrics2: "File mapping read id to read group",
+            umiMetrics3: "File mapping read id to read group"
         }
     }
 }
