@@ -200,8 +200,6 @@ task bamSplit {
     input {
         File bamFile
         String outputPrefix
-        Int minLength = 3
-        Int maxLength = 4
         String modules = "samtools/1.9"
         Int memory = 24
         Int timeout = 6
@@ -210,8 +208,6 @@ task bamSplit {
     parameter_meta {
         bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
         outputPrefix: "Specifies the start of the output files"
-        minLength: "Minimum length of the barcode"
-        maxLength: "Maximum length of the barcode"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
         timeout: "Time in hours before task timeout"
@@ -220,21 +216,21 @@ task bamSplit {
     command <<<
         set -euo pipefail
 
-        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength * 2}.bam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACTG]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength * 2}.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam > ~{outputPrefix}.~{minLength * 2}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.3.bam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{3}\.\[ACTG]{3}\t" >> ~{outputPrefix}.3.sam
+        samtools view -Sb ~{outputPrefix}.3.sam > ~{outputPrefix}.3.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.7.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{3}\.\[ACGT]{4}\t" >> ~{outputPrefix}.7.sam
+        samtools view -Sb ~{outputPrefix}.7.sam > ~{outputPrefix}.7.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.7.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{4}\.\[ACGT]{3}\t" >> ~{outputPrefix}.7.sam
+        samtools view -Sb ~{outputPrefix}.7.sam > ~{outputPrefix}.7.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength * 2}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength * 2}.sam
-        samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam > ~{outputPrefix}.~{maxLength * 2}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.8.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{4}\.\[ACGT]{4}\t" >> ~{outputPrefix}.8.sam
+        samtools view -Sb ~{outputPrefix}.8.sam > ~{outputPrefix}.8.bam
     >>>
 
     runtime {
@@ -287,7 +283,7 @@ task umiDeduplications {
 
         samtools merge ~{outputPrefix}.dedup.bam \
         ~{outputPrefix}.~{minLength + minLength}.dedup.bam \
-        ~{outputPrefix}.~{minLength + maxLength}.dedup.bam \
+        ~{outputPrefix}.7.dedup.bam \
         ~{outputPrefix}.~{maxLength + maxLength}.dedup.bam
     >>>
 
@@ -300,7 +296,7 @@ task umiDeduplications {
     output {
         File umiDedupBam = "~{outputPrefix}.dedup.bam"
         File umiMetrics1 = "~{outputPrefix}.~{minLength + minLength}.umi_groups.tsv"
-        File umiMetrics2 = "~{outputPrefix}.~{minLength + maxLength}.umi_groups.tsv"
+        File umiMetrics2 = "~{outputPrefix}.7.umi_groups.tsv"
         File umiMetrics3 = "~{outputPrefix}.{maxLength + maxLength}.umi_groups.tsv"
     }
 
