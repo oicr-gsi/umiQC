@@ -208,6 +208,8 @@ task bamSplit {
     parameter_meta {
         bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
         outputPrefix: "Specifies the start of the output files"
+        minLength: "Minimum length of barcode from barcode list"
+        maxLength: "Maximum length of barcode from barcode list"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
         timeout: "Time in hours before task timeout"
@@ -215,16 +217,32 @@ task bamSplit {
 
     command <<<
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength * 2}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength * 2}.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam > ~{outputPrefix}.~{minLength * 2}.bam
+        samtools view ~{bamFile} \
+        | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{minLength}}\t" \
+        >> ~{outputPrefix}.~{minLength * 2}.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam \
+        > ~{outputPrefix}.~{minLength * 2}.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.1.sam
+        samtools view ~{bamFile} \
+        | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" \
+        >> ~{outputPrefix}.~{minLength + maxLength}.1.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.1.sam \
+        > ~{outputPrefix}.~{minLength + maxLength}.1.bam
+
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.2.sam
+        samtools view ~{bamFile} \
+        | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{minLength}}\t" \
+        >> ~{outputPrefix}.~{minLength + maxLength}.2.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.2.sam \
+        > ~{outputPrefix}.~{minLength + maxLength}.2.bam
 
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength * 2}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength * 2}.sam
-        samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam > ~{outputPrefix}.~{maxLength * 2}.bam
+        samtools view ~{bamFile} \
+        | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" \
+        >> ~{outputPrefix}.~{maxLength * 2}.sam
+        samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam \
+        > ~{outputPrefix}.~{maxLength * 2}.bam
     >>>
 
     runtime {
@@ -235,16 +253,18 @@ task bamSplit {
 
     output {
         File outputSix = "~{outputPrefix}.~{minLength * 2}.bam"
-        File outputSeven = "~{outputPrefix}.~{minLength + maxLength}.bam"
+        File outputSevenOne = "~{outputPrefix}.~{minLength + maxLength}.1.bam"
+        File outputSevenTwo = "~{outputPrefix}.~{minLength + maxLength}.2.bam"
         File outputEight = "~{outputPrefix}.~{maxLength * 2}.bam"
         Array[File] bamFiles = glob("*.bam")
     }
 
     meta {
         output_meta: {
-            outputSix: "UMIs with length six",
-            outputSeven: "UMIs with length seven",
-            outputEight: "UMIs with length eight",
+            outputSix: "UMIs with total barcode length six",
+            outputSevenOne: "UMIs with barcode length three + four",
+            outputSevenTwo: "UMIs with barcode length four + three",
+            outputEight: "UMIs with total barcode length eight",
             bamFiles: "Array of BAMs with varying lengths of UMIs"
         }
     }
@@ -262,6 +282,9 @@ task umiDeduplications {
     }
 
     parameter_meta {
+        bamFiles: "Array of BAM files with varying lengths of UMIs"
+        minLength: "Minimum length of barcode from barcode list"
+        maxLength: "Maximum length of barcode from barcode list"
         outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"

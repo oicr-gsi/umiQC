@@ -50,7 +50,7 @@ Parameter|Value|Description
 #### Optional workflow parameters:
 Parameter|Value|Default|Description
 ---|---|---|---
-`outputFileNamePrefix`|String|"output"|Specifies the start of output files
+`outputPrefix`|String|"output"|Specifies the start of output files
 
 
 #### Optional task parameters:
@@ -157,9 +157,16 @@ Parameter|Value|Default|Description
 `preDedupBamQC.filter_jobMemory`|Int|16|Memory allocated for this job
 `preDedupBamQC.filter_modules`|String|"samtools/1.9"|required environment modules
 `preDedupBamQC.filter_minQuality`|Int|30|Minimum alignment quality to pass filter
-`umiDeduplication.modules`|String|"umi-tools/1.0.0"|Required environment modules
-`umiDeduplication.memory`|Int|24|Memory allocated for this job
-`umiDeduplication.timeout`|Int|6|Time in hours before task timeout
+`bamSplit.minLength`|Int|3|Minimum length of barcode from barcode list
+`bamSplit.maxLength`|Int|4|Maximum length of barcode from barcode list
+`bamSplit.modules`|String|"samtools/1.9"|Required environment modules
+`bamSplit.memory`|Int|24|Memory allocated for this job
+`bamSplit.timeout`|Int|6|Time in hours before task timeout
+`umiDeduplications.minLength`|Int|3|Minimum length of barcode from barcode list
+`umiDeduplications.maxLength`|Int|4|Maximum length of barcode from barcode list
+`umiDeduplications.modules`|String|"umi-tools/1.0.0 samtools/1.9"|Required environment modules
+`umiDeduplications.memory`|Int|24|Memory allocated for this job
+`umiDeduplications.timeout`|Int|6|Time in hours before task timeout
 `postDedupBamQC.collateResults_timeout`|Int|1|hours before task timeout
 `postDedupBamQC.collateResults_threads`|Int|4|Requested CPU threads
 `postDedupBamQC.collateResults_jobMemory`|Int|8|Memory allocated for this job
@@ -237,7 +244,9 @@ Output | Type | Description
 `umiCounts`|File|Record of UMI counts after extraction
 `extractionMetrics`|File|Metrics relating to extraction process
 `preDedupBamMetrics`|File|BamQC report on bam file pre-deduplication
-`umiGroups`|File|File mapping read id to read group
+`umiMetricsSix`|File|File mapping read id to read group
+`umiMetricsSeven`|File|File mapping read id to read group
+`umiMetricsEight`|File|File mapping read id to read group
 `postDedupBamMetrics`|File|BamQC report on bam file post-deduplication
 
 
