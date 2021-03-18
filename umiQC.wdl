@@ -272,7 +272,7 @@ task umiDeduplications {
         for x in ~{sep=' ' bamFiles}
         do
             samtools index "${x}"
-            umi_tools group -I "${x} \
+            umi_tools group -I "${x}" \
             --group-out=$(basename "${x}" .bam).umi_groups.tsv \
             --output-bam > $(basename "${x}" .bam).dedup.bam \
             --log=group.log --paired | samtools view
