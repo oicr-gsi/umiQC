@@ -158,6 +158,8 @@ task extractUMIs {
     }
 
     command <<<
+        set -euo pipefail
+
         barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
         --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
         --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastq2} 
@@ -216,6 +218,8 @@ task bamSplit {
     }
 
     command <<<
+        set -euo pipefail
+
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength * 2}.sam
         samtools view ~{bamFile} \
         | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{minLength}}\t" \
@@ -252,19 +256,11 @@ task bamSplit {
     }
 
     output {
-        File outputSix = "~{outputPrefix}.~{minLength * 2}.bam"
-        File outputSevenOne = "~{outputPrefix}.~{minLength + maxLength}.1.bam"
-        File outputSevenTwo = "~{outputPrefix}.~{minLength + maxLength}.2.bam"
-        File outputEight = "~{outputPrefix}.~{maxLength * 2}.bam"
         Array[File] bamFiles = glob("*.bam")
     }
 
     meta {
         output_meta: {
-            outputSix: "UMIs with total barcode length six",
-            outputSevenOne: "UMIs with barcode length three + four",
-            outputSevenTwo: "UMIs with barcode length four + three",
-            outputEight: "UMIs with total barcode length eight",
             bamFiles: "Array of BAMs with varying lengths of UMIs"
         }
     }
@@ -292,6 +288,8 @@ task umiDeduplications {
     }
 
     command <<<
+        set -euo pipefail
+
         for x in ~{sep=' ' bamFiles}
         do
             samtools index "${x}"
