@@ -109,9 +109,7 @@ workflow umiQC {
     call umiDeduplications {
         input:
             outputPrefix = outputPrefix,
-            umiSix = bamSplit.outputSix,
-            umiSeven = bamSplit.outputSeven,
-            umiEight = bamSplit.outputEight
+            bamFiles = bamSplit.bamFiles
     }
 
     call bamQC.bamQC as postDedupBamQC {
@@ -254,12 +252,9 @@ task bamSplit {
 
 task umiDeduplications {
     input {
-        File umiSix
-        File umiSeven
-        File umiEight
-        String outputPrefixSix = "output.6"
-        String outputPrefixSeven = "output.7"
-        String outputPrefixEight = "output.8"
+        Array[File] bamFiles
+        Int minLength = 3
+        Int maxLength = 4
         String outputPrefix
         String modules = "umi-tools/1.0.0 samtools/1.9"
         Int memory = 24
@@ -267,12 +262,6 @@ task umiDeduplications {
     }
 
     parameter_meta {
-        umiSix: "Bam file with UMIs of length six"
-        umiSeven: "Bam file with UMIs of length seven"
-        umiEight: "Bam file with UMIs of length eight"
-        outputPrefixSix: "Specifies the start of the output files"
-        outputPrefixSeven: "Specifies the start of the output files"
-        outputPrefixEight: "Specifies the start of the output files"
         outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
@@ -280,29 +269,18 @@ task umiDeduplications {
     }
 
     command <<<
-        samtools index ~{umiSix}
-        samtools index ~{umiSeven}
-        samtools index ~{umiEight}
-
-        umi_tools group -I ~{umiSix} \
-        --group-out=~{outputPrefixSix}.umi_groups.tsv \
-        --output-bam > ~{outputPrefixSix}.dedup.bam \
-        --log=group.log --paired | samtools view
-
-        umi_tools group -I ~{umiSeven} \
-        --group-out=~{outputPrefixSeven}.umi_groups.tsv \
-        --output-bam > ~{outputPrefixSeven}.dedup.bam \
-        --log=group.log --paired | samtools view
-
-        umi_tools group -I ~{umiEight} \
-        --group-out=~{outputPrefixEight}.umi_groups.tsv \
-        --output-bam > ~{outputPrefixEight}.dedup.bam \
-        --log=group.log --paired | samtools view
+        for x in ~{sep=' ' bamFiles}
+        do
+            samtools index "${x}"
+            umi_tools group -I "${x} \
+            --group-out=$(basename "${x}" .bam).umi_groups.tsv \
+            --output-bam > $(basename "${x}" .bam).dedup.bam \
+            --log=group.log --paired | samtools view
 
         samtools merge ~{outputPrefix}.dedup.bam \
-        ~{outputPrefixSix}.dedup.bam \
-        ~{outputPrefixSeven}.dedup.bam \
-        ~{outputPrefixEight}.dedup.bam
+        ~{outputPrefix}.~{minLength * 2}.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.dedup.bam \
+        ~{outputPrefix}.~{maxLength * 2}.dedup.bam
     >>>
 
     runtime {
@@ -313,9 +291,9 @@ task umiDeduplications {
 
     output {
         File umiDedupBam = "~{outputPrefix}.dedup.bam"
-        File umiMetricsSix = "~{outputPrefixSix}.umi_groups.tsv"
-        File umiMetricsSeven = "~{outputPrefixSeven}.umi_groups.tsv"
-        File umiMetricsEight = "~{outputPrefixEight}.umi_groups.tsv"
+        File umiMetricsSix = "~{outputPrefix}.~{minLength * 2}.umi_groups.tsv"
+        File umiMetricsSeven = "~{outputPrefix}.~{minLength + maxLength}.umi_groups.tsv"
+        File umiMetricsEight = "~{outputPrefix}.~{maxLength * 2}.umi_groups.tsv"
     }
 
     meta {
