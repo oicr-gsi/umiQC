@@ -72,9 +72,7 @@ workflow umiQC {
             umiCounts: "Record of UMI counts after extraction",
             extractionMetrics: "Metrics relating to extraction process",
             preDedupBamMetrics: "BamQC report on bam file pre-deduplication",
-            umiMetricsSix: "File mapping read id to read group",
-            umiMetricsSeven: "File mapping read id to read group",
-            umiMetricsEight: "File mapping read id to read group",
+            umiMetrics: "File mapping read id to read group",
             postDedupBamMetrics: "BamQC report on bam file post-deduplication"
         }
     }
@@ -127,9 +125,7 @@ workflow umiQC {
         File preDedupBamMetrics = preDedupBamQC.result
 
         # umi-tools metrics
-        File umiMetricsSix = umiDeduplications.umiMetricsSix
-        File umiMetricsSeven = umiDeduplications.umiMetricsSeven
-        File umiMetricsEight = umiDeduplications.umiMetricsEight
+        File umiMetrics = umiDeduplications.umiMetrics
 
         # post-collapse bamqc metrics
         File postDedupBamMetrics = postDedupBamQC.result
@@ -303,6 +299,11 @@ task umiDeduplications {
         ~{outputPrefix}.~{minLength * 2}.dedup.bam \
         ~{outputPrefix}.~{minLength + maxLength}.dedup.bam \
         ~{outputPrefix}.~{maxLength * 2}.dedup.bam
+
+        paste ~{outputPrefix}.~{minLength * 2}.umi_groups.tsv \
+        ~{outputPrefix}.~{minLength + maxLength}.umi_groups.tsv \
+        ~{outputPrefix}.~{maxLength * 2}.umi_groups.tsv > \
+        ~{outputPrefix}.umi_groups.tsv
     >>>
 
     runtime {
@@ -313,17 +314,13 @@ task umiDeduplications {
 
     output {
         File umiDedupBam = "~{outputPrefix}.dedup.bam"
-        File umiMetricsSix = "~{outputPrefix}.~{minLength * 2}.umi_groups.tsv"
-        File umiMetricsSeven = "~{outputPrefix}.~{minLength + maxLength}.umi_groups.tsv"
-        File umiMetricsEight = "~{outputPrefix}.~{maxLength * 2}.umi_groups.tsv"
+        File umiMetrics = "~{outputPrefix}.umi_groups.tsv"
     }
 
     meta {
         output_meta: {
             umiDedupBam: "Deduplicated bam file",
-            umiMetricsSix: "File mapping read id to read group",
-            umiMetricsSeven: "File mapping read id to read group",
-            umiMetricsEight: "File mapping read id to read group"
+            umiMetrics: "File mapping read id to read group"
         }
     }
 }
