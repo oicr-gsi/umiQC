@@ -253,11 +253,19 @@ task bamSplit {
 
     output {
         Array[File] bamFiles = glob("*.bam")
+        File bam1 = "~{outputPrefix}.~{minLength * 2}.bam"
+        File bam2 = "~{outputPrefix}.~{minLength + maxLength}.1.bam"
+        File bam3 = "~{outputPrefix}.~{minLength + maxLength}.2.bam"
+        File bam4 = "~{outputPrefix}.~{maxLength * 2}.bam"
     }
 
     meta {
         output_meta: {
-            bamFiles: "Array of BAMs with varying lengths of UMIs"
+            bamFiles: "Array of BAMs with varying lengths of UMIs",
+            bam1: "BAM file with shortest total barcode length",
+            bam2: "BAM file with medium total barcode length",
+            bam3: "BAM file with medium total barcode length",
+            bam4: "BAM file with greatest total barcode length"
         }
     }
 }
