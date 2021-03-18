@@ -216,9 +216,9 @@ task bamSplit {
     command <<<
         set -euo pipefail
 
-        samtools view -H ~{bamFile} > ~{outputPrefix}.3.bam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{3}\.\[ACTG]{3}\t" >> ~{outputPrefix}.3.sam
-        samtools view -Sb ~{outputPrefix}.3.sam > ~{outputPrefix}.3.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.6.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{3}\.\[ACTG]{3}\t" >> ~{outputPrefix}.6.sam
+        samtools view -Sb ~{outputPrefix}.6.sam > ~{outputPrefix}.6.bam
 
         samtools view -H ~{bamFile} > ~{outputPrefix}.7.sam
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{3}\.\[ACGT]{4}\t" >> ~{outputPrefix}.7.sam
