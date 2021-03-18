@@ -217,32 +217,20 @@ task bamSplit {
         set -euo pipefail
 
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength * 2}.sam
-        samtools view ~{bamFile} \
-        | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{minLength}}\t" \
-        >> ~{outputPrefix}.~{minLength * 2}.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam \
-        > ~{outputPrefix}.~{minLength * 2}.bam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength * 2}.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam > ~{outputPrefix}.~{minLength * 2}.bam
 
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.1.sam
-        samtools view ~{bamFile} \
-        | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" \
-        >> ~{outputPrefix}.~{minLength + maxLength}.1.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.1.sam \
-        > ~{outputPrefix}.~{minLength + maxLength}.1.bam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.1.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.1.sam > ~{outputPrefix}.~{minLength + maxLength}.1.bam
 
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.2.sam
-        samtools view ~{bamFile} \
-        | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{minLength}}\t" \
-        >> ~{outputPrefix}.~{minLength + maxLength}.2.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.2.sam \
-        > ~{outputPrefix}.~{minLength + maxLength}.2.bam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.2.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.2.sam > ~{outputPrefix}.~{minLength + maxLength}.2.bam
 
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength * 2}.sam
-        samtools view ~{bamFile} \
-        | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" \
-        >> ~{outputPrefix}.~{maxLength * 2}.sam
-        samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam \
-        > ~{outputPrefix}.~{maxLength * 2}.bam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength * 2}.sam
+        samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam > ~{outputPrefix}.~{maxLength * 2}.bam
     >>>
 
     runtime {
@@ -252,20 +240,20 @@ task bamSplit {
     }
 
     output {
-        Array[File] bamFiles = glob("*.bam")
         File bam1 = "~{outputPrefix}.~{minLength * 2}.bam"
         File bam2 = "~{outputPrefix}.~{minLength + maxLength}.1.bam"
         File bam3 = "~{outputPrefix}.~{minLength + maxLength}.2.bam"
         File bam4 = "~{outputPrefix}.~{maxLength * 2}.bam"
+        Array[File] bamFiles = glob("*.bam")
     }
 
     meta {
         output_meta: {
-            bamFiles: "Array of BAMs with varying lengths of UMIs",
             bam1: "BAM file with shortest total barcode length",
             bam2: "BAM file with medium total barcode length",
             bam3: "BAM file with medium total barcode length",
-            bam4: "BAM file with greatest total barcode length"
+            bam4: "BAM file with greatest total barcode length",
+            bamFiles: "Array of BAMs with varying lengths of UMIs"
         }
     }
 }
