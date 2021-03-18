@@ -301,7 +301,8 @@ task umiDeduplications {
         ~{outputPrefix}.~{maxLength * 2}.dedup.bam
 
         paste ~{outputPrefix}.~{minLength * 2}.umi_groups.tsv \
-        ~{outputPrefix}.~{minLength + maxLength}.umi_groups.tsv \
+        ~{outputPrefix}.~{minLength + maxLength}.1.umi_groups.tsv \
+        ~{outputPrefix}.~{minLength + maxLength}.2.umi_groups.tsv \
         ~{outputPrefix}.~{maxLength * 2}.umi_groups.tsv > \
         ~{outputPrefix}.umi_groups.tsv
     >>>
