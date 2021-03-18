@@ -198,7 +198,7 @@ task bamSplit {
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
         samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
-        
+
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength * 2}.sam
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength * 2}.sam
         samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam > ~{outputPrefix}.~{maxLength * 2}.bam
@@ -252,8 +252,7 @@ task umiDeduplications {
 
         samtools merge ~{outputPrefix}.dedup.bam \
         ~{outputPrefix}.~{minLength * 2}.dedup.bam \
-        ~{outputPrefix}.~{minLength + maxLength}.1.dedup.bam \
-        ~{outputPrefix}.~{minLength + maxLength}.2.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.dedup.bam \
         ~{outputPrefix}.~{maxLength * 2}.dedup.bam
     >>>
     runtime {
