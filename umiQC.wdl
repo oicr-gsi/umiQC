@@ -240,12 +240,14 @@ task bamSplit {
     }
 
     output {
-        Array[File] bamFiles = glob("*.bam")
+        # Array[File] bamFiles = glob("*.bam")
+        File out1 = ~{outputPrefix}.6.bam
     }
 
     meta {
         output_meta: {
-            bamFiles: "Array of BAM files containing UMIs of varying lengths"
+            # bamFiles: "Array of BAM files containing UMIs of varying lengths"
+            out1: "test output"
         }
     }
 }
