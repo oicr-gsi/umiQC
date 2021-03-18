@@ -297,7 +297,8 @@ task umiDeduplications {
 
         samtools merge ~{outputPrefix}.dedup.bam \
         ~{outputPrefix}.~{minLength * 2}.dedup.bam \
-        ~{outputPrefix}.~{minLength + maxLength}.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.1.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.2.dedup.bam \
         ~{outputPrefix}.~{maxLength * 2}.dedup.bam
 
         paste ~{outputPrefix}.~{minLength * 2}.umi_groups.tsv \
