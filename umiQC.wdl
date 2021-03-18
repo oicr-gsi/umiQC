@@ -276,6 +276,7 @@ task umiDeduplications {
             --group-out=$(basename "${x}" .bam).umi_groups.tsv \
             --output-bam > $(basename "${x}" .bam).dedup.bam \
             --log=group.log --paired | samtools view
+        done;
 
         samtools merge ~{outputPrefix}.dedup.bam \
         ~{outputPrefix}.~{minLength * 2}.dedup.bam \
