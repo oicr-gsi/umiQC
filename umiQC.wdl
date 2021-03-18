@@ -102,7 +102,8 @@ workflow umiQC {
 
     call bamSplit {
         input:
-            bamFile = bwaMem.bwaMemBam
+            bamFile = bwaMem.bwaMemBam,
+            outputPrefix = outputPrefix
     }
 
     call umiDeduplications {
@@ -138,69 +139,66 @@ workflow umiQC {
 }
 
 task extractUMIs {
-        input {
-            File umiList
-            String outputPrefix
-            File fastq1
-            File fastq2
-            String modules = "barcodex-rs/0.1.2 rust/1.45.1"
-            Int memory = 24
-            Int timeout = 12
-        }
+    input {
+        File umiList
+        String outputPrefix
+        File fastq1
+        File fastq2
+        String modules = "barcodex-rs/0.1.2 rust/1.45.1"
+        Int memory = 24
+        Int timeout = 12
+    }
 
-        parameter_meta {
-            umiList: "File with valid UMIs"
-            outputPrefix: "Specifies the start of the output files"
-            fastqR1: "FASTQ file containing read 1"
-            fastqR2: "FASTQ file containing read 2"
-            modules: "Required environment modules"
-            memory: "Memory allocated for this job"
-            timeout: "Time in hours before task timeout"
-        }
+    parameter_meta {
+        umiList: "File with valid UMIs"
+        outputPrefix: "Specifies the start of the output files"
+        fastqR1: "FASTQ file containing read 1"
+        fastqR2: "FASTQ file containing read 2"
+        modules: "Required environment modules"
+        memory: "Memory allocated for this job"
+        timeout: "Time in hours before task timeout"
+    }
 
-        command <<<
-            barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
-            --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
-            --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastq2} 
-        >>>
+    command <<<
+        barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
+        --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
+        --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastq2} 
+    >>>
 
-        runtime {
-            modules: "~{modules}"
-            memory: "~{memory}G"
-            timeout: "~{timeout}"
-        }
+    runtime {
+        modules: "~{modules}"
+        memory: "~{memory}G"
+        timeout: "~{timeout}"
+    }
 
-        output {
-            File fastqR1 = "~{outputPrefix}_R1.fastq.gz"
-            File fastqR2 = "~{outputPrefix}_R2.fastq.gz"
-            File discardR1 = "~{outputPrefix}_R1.discarded.fastq.gz"
-            File discardR2 = "~{outputPrefix}_R2.discarded.fastq.gz"
-            File extractR1 = "~{outputPrefix}_R1.extracted.fastq.gz"
-            File extractR2 = "~{outputPrefix}_R2.extracted.fastq.gz"
-            File umiCounts = "~{outputPrefix}_UMI_counts.json"
-            File extractionMetrics = "~{outputPrefix}_extraction_metrics.json"
-        }
+    output {
+        File fastqR1 = "~{outputPrefix}_R1.fastq.gz"
+        File fastqR2 = "~{outputPrefix}_R2.fastq.gz"
+        File discardR1 = "~{outputPrefix}_R1.discarded.fastq.gz"
+        File discardR2 = "~{outputPrefix}_R2.discarded.fastq.gz"
+        File extractR1 = "~{outputPrefix}_R1.extracted.fastq.gz"
+        File extractR2 = "~{outputPrefix}_R2.extracted.fastq.gz"
+        File umiCounts = "~{outputPrefix}_UMI_counts.json"
+        File extractionMetrics = "~{outputPrefix}_extraction_metrics.json"
+    }
 
-        meta {
-            output_meta: {
-                fastqR1: "Read 1 fastq file with UMIs extracted",
-                fastqR2: "Read 2 fastq file with UMIs extracted",
-                discardR1: "Reads without a matching UMI pattern in read 1",
-                discardR2: "Reads without a matching UMI pattern in read 2",
-                extractR1: "Extracted reads (UMIs and any spacer sequences) from read 1",
-                extractR2: "Extracted reads (UMIs and any spacer sequences) from read 2",
-                umiCounts: "Record of UMI counts after extraction",
-                extractionMetrics: "Metrics relating to extraction process"
-            }
+    meta {
+        output_meta: {
+            fastqR1: "Read 1 fastq file with UMIs extracted",
+            fastqR2: "Read 2 fastq file with UMIs extracted",
+            discardR1: "Reads without a matching UMI pattern in read 1",
+            discardR2: "Reads without a matching UMI pattern in read 2",
+            extractR1: "Extracted reads (UMIs and any spacer sequences) from read 1",
+            extractR2: "Extracted reads (UMIs and any spacer sequences) from read 2",
+            umiCounts: "Record of UMI counts after extraction",
+            extractionMetrics: "Metrics relating to extraction process"
         }
     }
+}
 
 task bamSplit {
     input {
         File bamFile
-        String outputPrefixSix = "output.6"
-        String outputPrefixSeven = "output.7"
-        String outputPrefixEight = "output.8"
         String outputPrefix
         Int minLength = 3
         Int maxLength = 4
@@ -211,9 +209,7 @@ task bamSplit {
 
     parameter_meta {
         bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
-        outputPrefixSix: "Specifies the start of the output files"
-        outputPrefixSeven: "Specifies the start of the output files"
-        outputPrefixEight: "Specifies the start of the output files"
+        outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
         timeout: "Time in hours before task timeout"
