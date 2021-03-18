@@ -194,9 +194,11 @@ task bamSplit {
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength * 2}.sam
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength * 2}.sam
         samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam > ~{outputPrefix}.~{minLength * 2}.bam
+
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
         samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
+        
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength * 2}.sam
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength * 2}.sam
         samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam > ~{outputPrefix}.~{maxLength * 2}.bam
@@ -241,15 +243,17 @@ task umiDeduplications {
         for x in ~{sep=' ' bamFiles}
         do
             samtools index "${x}"
-            umi_tools group -I "${x} \
+            umi_tools group -I "${x}" \
             umi_tools group -I "${x}" \
             --group-out=$(basename "${x}" .bam).umi_groups.tsv \
             --output-bam > $(basename "${x}" .bam).dedup.bam \
             --log=group.log --paired | samtools view
         done;
+
         samtools merge ~{outputPrefix}.dedup.bam \
         ~{outputPrefix}.~{minLength * 2}.dedup.bam \
-        ~{outputPrefix}.~{minLength + maxLength}.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.1.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.2.dedup.bam \
         ~{outputPrefix}.~{maxLength * 2}.dedup.bam
     >>>
     runtime {
