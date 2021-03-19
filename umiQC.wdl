@@ -234,19 +234,11 @@ task bamSplit {
     }
 
     output {
-        File bam1 = "~{outputPrefix}.~{minLength * 2}.bam"
-        File bam2 = "~{outputPrefix}.~{minLength + maxLength}.1.bam"
-        File bam3 = "~{outputPrefix}.~{minLength + maxLength}.2.bam"
-        File bam4 = "~{outputPrefix}.~{maxLength * 2}.bam"
         Array[File] bamFiles = glob("*.bam")
     }
 
     meta {
         output_meta: {
-            bam1: "UMIs with length six",
-            bam2: "UMIs with length seven",
-            bam3: "UMIs with length seven",
-            bam4: "UMIs with length eight",
             bamFiles: "Array of BAMs with varying lengths of UMIs"
         }
     }
