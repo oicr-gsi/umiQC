@@ -195,9 +195,13 @@ task bamSplit {
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength * 2}.sam
         samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam > ~{outputPrefix}.~{minLength * 2}.bam
 
-        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.sam
-        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.sam > ~{outputPrefix}.~{minLength + maxLength}.bam
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.1.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.1.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.1.sam > ~{outputPrefix}.~{minLength + maxLength}.1.bam
+
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.2.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.2.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.2.sam > ~{outputPrefix}.~{minLength + maxLength}.2.bam
 
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength * 2}.sam
         samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength * 2}.sam
@@ -209,16 +213,18 @@ task bamSplit {
         timeout: "~{timeout}"
     }
     output {
-        File outputSix = "~{outputPrefix}.~{minLength * 2}.bam"
-        File outputSeven = "~{outputPrefix}.~{minLength + maxLength}.bam"
-        File outputEight = "~{outputPrefix}.~{maxLength * 2}.bam"
+        File bam1 = "~{outputPrefix}.~{minLength * 2}.bam"
+        File bam2 = "~{outputPrefix}.~{minLength + maxLength}.1.bam"
+        File bam3 = "~{outputPrefix}.~{minLength + maxLength}.2.bam"
+        File bam4 = "~{outputPrefix}.~{maxLength * 2}.bam"
         Array[File] bamFiles = glob("*.bam")
     }
     meta {
         output_meta: {
-            outputSix: "UMIs with length six",
-            outputSeven: "UMIs with length seven",
-            outputEight: "UMIs with length eight",
+            bam1: "UMIs with length six",
+            bam2: "UMIs with length seven",
+            bam3: "UMIs with length seven",
+            bam4: "UMIs with length eight",
             bamFiles: "Array of BAMs with varying lengths of UMIs"
         }
     }
