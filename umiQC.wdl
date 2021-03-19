@@ -1,6 +1,8 @@
 version 1.0
+
 import "imports/pull_bwaMem.wdl" as bwaMem
 import "imports/pull_bamQC.wdl" as bamQC
+
 workflow umiQC {
     input {
         File umiList
@@ -8,7 +10,7 @@ workflow umiQC {
         File fastq1
         File fastq2
     }
-    
+
     parameter_meta {
         umiList: "File with valid UMIs"
         outputPrefix: "Specifies the start of output files"
@@ -70,6 +72,7 @@ workflow umiQC {
             umiCounts: "Record of UMI counts after extraction",
             extractionMetrics: "Metrics relating to extraction process",
             preDedupBamMetrics: "BamQC report on bam file pre-deduplication",
+            umiMetrics: "File mapping read id to read group",
             postDedupBamMetrics: "BamQC report on bam file post-deduplication"
         }
     }
@@ -122,12 +125,13 @@ workflow umiQC {
         File preDedupBamMetrics = preDedupBamQC.result
 
         # umi-tools metrics
-        
+        File umiMetrics = umiDeduplications.umiMetrics
 
         # post-collapse bamqc metrics
         File postDedupBamMetrics = postDedupBamQC.result
     } 
 }
+
 task extractUMIs {
     input {
         File umiList
@@ -279,6 +283,12 @@ task umiDeduplications {
         ~{outputPrefix}.~{minLength + maxLength}.1.dedup.bam \
         ~{outputPrefix}.~{minLength + maxLength}.2.dedup.bam \
         ~{outputPrefix}.~{maxLength * 2}.dedup.bam
+
+        paste ~{outputPrefix}.~{minLength * 2}.umi_groups.tsv \
+        ~{outputPrefix}.~{minLength + maxLength}.1.umi_groups.tsv \
+        ~{outputPrefix}.~{minLength + maxLength}.2.umi_groups.tsv \
+        ~{outputPrefix}.~{maxLength * 2}.umi_groups.tsv \
+        > ~{outputPrefix}.umi_groups.tsv
     >>>
 
     runtime {
@@ -289,11 +299,13 @@ task umiDeduplications {
 
     output {
         File umiDedupBam = "~{outputPrefix}.dedup.bam"
+        File umiMetrics = "~{outputPrefix}.umi_groups.tsv"
     }
 
     meta {
         output_meta: {
-            umiDedupBam: "Deduplicated bam file"
+            umiDedupBam: "Deduplicated bam file",
+            umiMetrics: "File mapping read id to read group"
         }
     }
 }
