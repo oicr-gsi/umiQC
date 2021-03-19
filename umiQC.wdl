@@ -203,6 +203,8 @@ task bamSplit {
 
     parameter_meta {
         bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
+        minLength: "Shortest length of barcode found in barcode list"
+        maxLength: "Greatest length of barcode found in barcode list"
         outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
@@ -255,6 +257,9 @@ task umiDeduplications {
         Int timeout = 6
     }
     parameter_meta {
+        bamFiles: "Array of BAM files containing UMIs of varying lengths"
+        minLength: "Shortest length of barcode found in barcode list"
+        maxLength: "Greatest length of barcode found in barcode list"
         outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"

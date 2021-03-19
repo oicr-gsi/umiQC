@@ -157,13 +157,13 @@ Parameter|Value|Default|Description
 `preDedupBamQC.filter_jobMemory`|Int|16|Memory allocated for this job
 `preDedupBamQC.filter_modules`|String|"samtools/1.9"|required environment modules
 `preDedupBamQC.filter_minQuality`|Int|30|Minimum alignment quality to pass filter
-`bamSplit.minLength`|Int|3|Minimum length of barcode from barcode list
-`bamSplit.maxLength`|Int|4|Maximum length of barcode from barcode list
+`bamSplit.minLength`|Int|3|Shortest length of barcode found in barcode list
+`bamSplit.maxLength`|Int|4|Greatest length of barcode found in barcode list
 `bamSplit.modules`|String|"samtools/1.9"|Required environment modules
 `bamSplit.memory`|Int|24|Memory allocated for this job
 `bamSplit.timeout`|Int|6|Time in hours before task timeout
-`umiDeduplications.minLength`|Int|3|Minimum length of barcode from barcode list
-`umiDeduplications.maxLength`|Int|4|Maximum length of barcode from barcode list
+`umiDeduplications.minLength`|Int|3|Shortest length of barcode found in barcode list
+`umiDeduplications.maxLength`|Int|4|Greatest length of barcode found in barcode list
 `umiDeduplications.modules`|String|"umi-tools/1.0.0 samtools/1.9"|Required environment modules
 `umiDeduplications.memory`|Int|24|Memory allocated for this job
 `umiDeduplications.timeout`|Int|6|Time in hours before task timeout
@@ -244,9 +244,7 @@ Output | Type | Description
 `umiCounts`|File|Record of UMI counts after extraction
 `extractionMetrics`|File|Metrics relating to extraction process
 `preDedupBamMetrics`|File|BamQC report on bam file pre-deduplication
-`umiMetricsSix`|File|File mapping read id to read group
-`umiMetricsSeven`|File|File mapping read id to read group
-`umiMetricsEight`|File|File mapping read id to read group
+`umiMetrics`|File|File mapping read id to read group
 `postDedupBamMetrics`|File|BamQC report on bam file post-deduplication
 
 
