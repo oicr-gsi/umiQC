@@ -138,6 +138,8 @@ task extractUMIs {
         String outputPrefix
         File fastq1
         File fastq2
+        String pattern1
+        String pattern2
         String modules = "barcodex-rs/0.1.2 rust/1.45.1"
         Int memory = 24
         Int timeout = 12
@@ -148,15 +150,18 @@ task extractUMIs {
         outputPrefix: "Specifies the start of the output files"
         fastqR1: "FASTQ file containing read 1"
         fastqR2: "FASTQ file containing read 2"
+        pattern1: ""
+        pattern2: ""
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
         timeout: "Time in hours before task timeout"
     }
 
     command <<<
-        barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
-        --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
-        --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastq2} 
+        barcodex-rs --umilist ~{umiList} \
+        --prefix ~{outputPrefix} --separator "__" inline \
+        --pattern1 ~{pattern1} --r1-in ~{fastq1} \
+        --pattern2 ~{pattern2} --r2-in ~{fastq2} 
     >>>
 
     runtime {

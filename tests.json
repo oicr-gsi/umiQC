@@ -20,6 +20,8 @@
                 "umiQC.umiList": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt",
                 "umiQC.fastq1": "/.mounts/labs/gsi/testdata/umiQC/inputs/r1.fastq",
                 "umiQC.fastq2": "/.mounts/labs/gsi/testdata/umiQC/inputs/r2.fastq",
+                "umiQC.extractUMIs.pattern1": "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)",
+                "umiQC.extractUMIs.pattern2": "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)",
                 "umiQC.bwaMem.readGroups": "'@RG\\tID:1\\tLB:neat_5x_EX_hg19_golden\\tPL:illumina\\tPU:run_barcode\\tSM:neat_5x_EX_hg19_golden'",
                 "umiQC.bwaMem.runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg19-bwa-index/0.7.12",
                 "umiQC.bwaMem.runBwaMem_bwaRef": "$HG19_BWA_INDEX_ROOT/hg19_random.fa",
