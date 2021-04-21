@@ -150,8 +150,8 @@ task extractUMIs {
         outputPrefix: "Specifies the start of the output files"
         fastqR1: "FASTQ file containing read 1"
         fastqR2: "FASTQ file containing read 2"
-        pattern1: ""
-        pattern2: ""
+        pattern1: "Pattern for read1"
+        pattern2: "Pattern for read2"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
         timeout: "Time in hours before task timeout"
@@ -160,8 +160,8 @@ task extractUMIs {
     command <<<
         barcodex-rs --umilist ~{umiList} \
         --prefix ~{outputPrefix} --separator "__" inline \
-        --pattern1 ~{pattern1} --r1-in ~{fastq1} \
-        --pattern2 ~{pattern2} --r2-in ~{fastq2} 
+        --pattern1 "~{pattern1}" --r1-in ~{fastq1} \
+        --pattern2 "~{pattern2}" --r2-in ~{fastq2} 
     >>>
 
     runtime {
