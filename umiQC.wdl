@@ -72,9 +72,7 @@ workflow umiQC {
             umiCounts: "Record of UMI counts after extraction",
             extractionMetrics: "Metrics relating to extraction process",
             preDedupBamMetrics: "BamQC report on bam file pre-deduplication",
-            umiMetricsSix: "File mapping read id to read group",
-            umiMetricsSeven: "File mapping read id to read group",
-            umiMetricsEight: "File mapping read id to read group",
+            umiMetrics: "File mapping read id to read group",
             postDedupBamMetrics: "BamQC report on bam file post-deduplication"
         }
     }
@@ -102,15 +100,14 @@ workflow umiQC {
 
     call bamSplit {
         input:
-            bamFile = bwaMem.bwaMemBam
+            bamFile = bwaMem.bwaMemBam,
+            outputPrefix = outputPrefix
     }
-
+    
     call umiDeduplications {
         input:
             outputPrefix = outputPrefix,
-            umiSix = bamSplit.outputSix,
-            umiSeven = bamSplit.outputSeven,
-            umiEight = bamSplit.outputEight
+            bamFiles = bamSplit.bamFiles
     }
 
     call bamQC.bamQC as postDedupBamQC {
@@ -128,9 +125,7 @@ workflow umiQC {
         File preDedupBamMetrics = preDedupBamQC.result
 
         # umi-tools metrics
-        File umiMetricsSix = umiDeduplications.umiMetricsSix
-        File umiMetricsSeven = umiDeduplications.umiMetricsSeven
-        File umiMetricsEight = umiDeduplications.umiMetricsEight
+        File umiMetrics = umiDeduplications.umiMetrics
 
         # post-collapse bamqc metrics
         File postDedupBamMetrics = postDedupBamQC.result
@@ -138,96 +133,35 @@ workflow umiQC {
 }
 
 task extractUMIs {
-        input {
-            File umiList
-            String outputPrefix
-            File fastq1
-            File fastq2
-            String modules = "barcodex-rs/0.1.2 rust/1.45.1"
-            Int memory = 24
-            Int timeout = 12
-        }
-
-        parameter_meta {
-            umiList: "File with valid UMIs"
-            outputPrefix: "Specifies the start of the output files"
-            fastqR1: "FASTQ file containing read 1"
-            fastqR2: "FASTQ file containing read 2"
-            modules: "Required environment modules"
-            memory: "Memory allocated for this job"
-            timeout: "Time in hours before task timeout"
-        }
-
-        command <<<
-            barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
-            --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
-            --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastq2} 
-        >>>
-
-        runtime {
-            modules: "~{modules}"
-            memory: "~{memory}G"
-            timeout: "~{timeout}"
-        }
-
-        output {
-            File fastqR1 = "~{outputPrefix}_R1.fastq.gz"
-            File fastqR2 = "~{outputPrefix}_R2.fastq.gz"
-            File discardR1 = "~{outputPrefix}_R1.discarded.fastq.gz"
-            File discardR2 = "~{outputPrefix}_R2.discarded.fastq.gz"
-            File extractR1 = "~{outputPrefix}_R1.extracted.fastq.gz"
-            File extractR2 = "~{outputPrefix}_R2.extracted.fastq.gz"
-            File umiCounts = "~{outputPrefix}_UMI_counts.json"
-            File extractionMetrics = "~{outputPrefix}_extraction_metrics.json"
-        }
-
-        meta {
-            output_meta: {
-                fastqR1: "Read 1 fastq file with UMIs extracted",
-                fastqR2: "Read 2 fastq file with UMIs extracted",
-                discardR1: "Reads without a matching UMI pattern in read 1",
-                discardR2: "Reads without a matching UMI pattern in read 2",
-                extractR1: "Extracted reads (UMIs and any spacer sequences) from read 1",
-                extractR2: "Extracted reads (UMIs and any spacer sequences) from read 2",
-                umiCounts: "Record of UMI counts after extraction",
-                extractionMetrics: "Metrics relating to extraction process"
-            }
-        }
-    }
-
-task bamSplit {
     input {
-        File bamFile
-        String outputPrefixSix = "output.6"
-        String outputPrefixSeven = "output.7"
-        String outputPrefixEight = "output.8"
-        String modules = "samtools/1.9"
+        File umiList
+        String outputPrefix
+        File fastq1
+        File fastq2
+        String pattern1
+        String pattern2
+        String modules = "barcodex-rs/0.1.2 rust/1.45.1"
         Int memory = 24
-        Int timeout = 6
+        Int timeout = 12
     }
 
     parameter_meta {
-        bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
-        outputPrefixSix: "Specifies the start of the output files"
-        outputPrefixSeven: "Specifies the start of the output files"
-        outputPrefixEight: "Specifies the start of the output files"
+        umiList: "File with valid UMIs"
+        outputPrefix: "Specifies the start of the output files"
+        fastqR1: "FASTQ file containing read 1"
+        fastqR2: "FASTQ file containing read 2"
+        pattern1: "Pattern for read1"
+        pattern2: "Pattern for read2"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
         timeout: "Time in hours before task timeout"
     }
 
     command <<<
-        samtools view -H ~{bamFile} > ~{outputPrefixSix}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\S{6}\t" >> ~{outputPrefixSix}.sam
-        samtools view -Sb ~{outputPrefixSix}.sam > ~{outputPrefixSix}.bam
-
-        samtools view -H ~{bamFile} > ~{outputPrefixSeven}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\S{7}\t" >> ~{outputPrefixSeven}.sam
-        samtools view -Sb ~{outputPrefixSeven}.sam > ~{outputPrefixSeven}.bam
-
-        samtools view -H ~{bamFile} > ~{outputPrefixEight}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\S{8}\t" >> ~{outputPrefixEight}.sam
-        samtools view -Sb ~{outputPrefixEight}.sam > ~{outputPrefixEight}.bam
+        barcodex-rs --umilist ~{umiList} \
+        --prefix ~{outputPrefix} --separator "__" inline \
+        --pattern1 "~{pattern1}" --r1-in ~{fastq1} \
+        --pattern2 "~{pattern2}" --r2-in ~{fastq2} 
     >>>
 
     runtime {
@@ -237,41 +171,45 @@ task bamSplit {
     }
 
     output {
-        File outputSix = "~{outputPrefixSix}.bam"
-        File outputSeven = "~{outputPrefixSeven}.bam"
-        File outputEight = "~{outputPrefixEight}.bam"
+        File fastqR1 = "~{outputPrefix}_R1.fastq.gz"
+        File fastqR2 = "~{outputPrefix}_R2.fastq.gz"
+        File discardR1 = "~{outputPrefix}_R1.discarded.fastq.gz"
+        File discardR2 = "~{outputPrefix}_R2.discarded.fastq.gz"
+        File extractR1 = "~{outputPrefix}_R1.extracted.fastq.gz"
+        File extractR2 = "~{outputPrefix}_R2.extracted.fastq.gz"
+        File umiCounts = "~{outputPrefix}_UMI_counts.json"
+        File extractionMetrics = "~{outputPrefix}_extraction_metrics.json"
     }
 
     meta {
         output_meta: {
-            outputSix: "UMIs with length six",
-            outputSeven: "UMIs with length seven",
-            outputEight: "UMIs with length eight"
+            fastqR1: "Read 1 fastq file with UMIs extracted",
+            fastqR2: "Read 2 fastq file with UMIs extracted",
+            discardR1: "Reads without a matching UMI pattern in read 1",
+            discardR2: "Reads without a matching UMI pattern in read 2",
+            extractR1: "Extracted reads (UMIs and any spacer sequences) from read 1",
+            extractR2: "Extracted reads (UMIs and any spacer sequences) from read 2",
+            umiCounts: "Record of UMI counts after extraction",
+            extractionMetrics: "Metrics relating to extraction process"
         }
     }
 }
 
-task umiDeduplications {
+task bamSplit {
     input {
-        File umiSix
-        File umiSeven
-        File umiEight
-        String outputPrefixSix = "output.6"
-        String outputPrefixSeven = "output.7"
-        String outputPrefixEight = "output.8"
+        File bamFile
         String outputPrefix
-        String modules = "umi-tools/1.0.0 samtools/1.9"
+        Int minLength = 3
+        Int maxLength = 4
+        String modules = "samtools/1.9"
         Int memory = 24
         Int timeout = 6
     }
 
     parameter_meta {
-        umiSix: "Bam file with UMIs of length six"
-        umiSeven: "Bam file with UMIs of length seven"
-        umiEight: "Bam file with UMIs of length eight"
-        outputPrefixSix: "Specifies the start of the output files"
-        outputPrefixSeven: "Specifies the start of the output files"
-        outputPrefixEight: "Specifies the start of the output files"
+        bamFile: "Bam file from bwaMem containing UMIs of varying lengths"
+        minLength: "Shortest length of barcode found in barcode list"
+        maxLength: "Greatest length of barcode found in barcode list"
         outputPrefix: "Specifies the start of the output files"
         modules: "Required environment modules"
         memory: "Memory allocated for this job"
@@ -279,29 +217,80 @@ task umiDeduplications {
     }
 
     command <<<
-        samtools index ~{umiSix}
-        samtools index ~{umiSeven}
-        samtools index ~{umiEight}
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength * 2}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{minLength}}\t" >> ~{outputPrefix}.~{minLength * 2}.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength * 2}.sam > ~{outputPrefix}.~{minLength * 2}.bam
 
-        umi_tools group -I ~{umiSix} \
-        --group-out=~{outputPrefixSix}.umi_groups.tsv \
-        --output-bam > ~{outputPrefixSix}.dedup.bam \
-        --log=group.log --paired | samtools view
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.1.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.1.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.1.sam > ~{outputPrefix}.~{minLength + maxLength}.1.bam
 
-        umi_tools group -I ~{umiSeven} \
-        --group-out=~{outputPrefixSeven}.umi_groups.tsv \
-        --output-bam > ~{outputPrefixSeven}.dedup.bam \
-        --log=group.log --paired | samtools view
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{minLength + maxLength}.2.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{minLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{minLength + maxLength}.2.sam
+        samtools view -Sb ~{outputPrefix}.~{minLength + maxLength}.2.sam > ~{outputPrefix}.~{minLength + maxLength}.2.bam
 
-        umi_tools group -I ~{umiEight} \
-        --group-out=~{outputPrefixEight}.umi_groups.tsv \
-        --output-bam > ~{outputPrefixEight}.dedup.bam \
-        --log=group.log --paired | samtools view
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{maxLength * 2}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\[ACGT]{~{maxLength}}\.\[ACGT]{~{maxLength}}\t" >> ~{outputPrefix}.~{maxLength * 2}.sam
+        samtools view -Sb ~{outputPrefix}.~{maxLength * 2}.sam > ~{outputPrefix}.~{maxLength * 2}.bam
+    >>>
+
+    runtime {
+        modules: "~{modules}"
+        memory: "~{memory}G"
+        timeout: "~{timeout}"
+    }
+
+    output {
+        Array[File] bamFiles = glob("*.bam")
+    }
+
+    meta {
+        output_meta: {
+            bamFiles: "Array of BAMs with varying lengths of UMIs"
+        }
+    }
+}
+
+task umiDeduplications {
+    input {
+        Array[File] bamFiles
+        Int minLength = 3
+        Int maxLength = 4
+        String outputPrefix
+        String modules = "umi-tools/1.0.0 samtools/1.9"
+        Int memory = 24
+        Int timeout = 6
+    }
+    parameter_meta {
+        bamFiles: "Array of BAM files containing UMIs of varying lengths"
+        minLength: "Shortest length of barcode found in barcode list"
+        maxLength: "Greatest length of barcode found in barcode list"
+        outputPrefix: "Specifies the start of the output files"
+        modules: "Required environment modules"
+        memory: "Memory allocated for this job"
+        timeout: "Time in hours before task timeout"
+    }
+    command <<<
+        for x in ~{sep=' ' bamFiles}
+        do
+            samtools index "${x}"
+            umi_tools group -I "${x}" \
+            --group-out=$(basename "${x}" .bam).umi_groups.tsv \
+            --output-bam > $(basename "${x}" .bam).dedup.bam \
+            --log=group.log --paired | samtools view
+        done;
 
         samtools merge ~{outputPrefix}.dedup.bam \
-        ~{outputPrefixSix}.dedup.bam \
-        ~{outputPrefixSeven}.dedup.bam \
-        ~{outputPrefixEight}.dedup.bam
+        ~{outputPrefix}.~{minLength * 2}.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.1.dedup.bam \
+        ~{outputPrefix}.~{minLength + maxLength}.2.dedup.bam \
+        ~{outputPrefix}.~{maxLength * 2}.dedup.bam
+
+        paste ~{outputPrefix}.~{minLength * 2}.umi_groups.tsv \
+        ~{outputPrefix}.~{minLength + maxLength}.1.umi_groups.tsv \
+        ~{outputPrefix}.~{minLength + maxLength}.2.umi_groups.tsv \
+        ~{outputPrefix}.~{maxLength * 2}.umi_groups.tsv \
+        > ~{outputPrefix}.umi_groups.tsv
     >>>
 
     runtime {
@@ -312,17 +301,13 @@ task umiDeduplications {
 
     output {
         File umiDedupBam = "~{outputPrefix}.dedup.bam"
-        File umiMetricsSix = "~{outputPrefixSix}.umi_groups.tsv"
-        File umiMetricsSeven = "~{outputPrefixSeven}.umi_groups.tsv"
-        File umiMetricsEight = "~{outputPrefixEight}.umi_groups.tsv"
+        File umiMetrics = "~{outputPrefix}.umi_groups.tsv"
     }
 
     meta {
         output_meta: {
             umiDedupBam: "Deduplicated bam file",
-            umiMetricsSix: "File mapping read id to read group",
-            umiMetricsSeven: "File mapping read id to read group",
-            umiMetricsEight: "File mapping read id to read group"
+            umiMetrics: "File mapping read id to read group"
         }
     }
 }
