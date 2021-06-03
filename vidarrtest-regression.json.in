@@ -1,0 +1,316 @@
+[
+    {
+        "arguments": {
+            "umiQC.bamSplit.memory": null,
+            "umiQC.bamSplit.modules": "samtools/1.9",
+            "umiQC.bamSplit.outputPrefixEight": null,
+            "umiQC.bamSplit.outputPrefixSeven": null,
+            "umiQC.bamSplit.outputPrefixSix": null,
+            "umiQC.bamSplit.timeout": null,
+            "umiQC.bwaMem.adapter1": null,
+            "umiQC.bwaMem.adapter2": null,
+            "umiQC.bwaMem.adapterTrimmingLog_jobMemory": null,
+            "umiQC.bwaMem.adapterTrimmingLog_timeout": null,
+            "umiQC.bwaMem.adapterTrimming_addParam": null,
+            "umiQC.bwaMem.adapterTrimming_jobMemory": null,
+            "umiQC.bwaMem.adapterTrimming_modules": null,
+            "umiQC.bwaMem.adapterTrimming_timeout": null,
+            "umiQC.bwaMem.bamMerge_jobMemory": null,
+            "umiQC.bwaMem.bamMerge_modules": null,
+            "umiQC.bwaMem.bamMerge_timeout": null,
+            "umiQC.bwaMem.countChunkSize_jobMemory": null,
+            "umiQC.bwaMem.countChunkSize_timeout": null,
+            "umiQC.bwaMem.doTrim": null,
+            "umiQC.bwaMem.indexBam_jobMemory": null,
+            "umiQC.bwaMem.indexBam_modules": null,
+            "umiQC.bwaMem.indexBam_timeout": null,
+            "umiQC.bwaMem.numChunk": null,
+            "umiQC.bwaMem.readGroups": "'@RG\\tID:1\\tLB:neat_5x_EX_hg19_golden\\tPL:illumina\\tPU:run_barcode\\tSM:neat_5x_EX_hg19_golden'",
+            "umiQC.bwaMem.runBwaMem_addParam": null,
+            "umiQC.bwaMem.runBwaMem_bwaRef": "$HG19_BWA_INDEX_ROOT/hg19_random.fa",
+            "umiQC.bwaMem.runBwaMem_jobMemory": null,
+            "umiQC.bwaMem.runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg19-bwa-index/0.7.12",
+            "umiQC.bwaMem.runBwaMem_threads": null,
+            "umiQC.bwaMem.runBwaMem_timeout": null,
+            "umiQC.bwaMem.slicerR1_jobMemory": null,
+            "umiQC.bwaMem.slicerR1_modules": null,
+            "umiQC.bwaMem.slicerR1_timeout": null,
+            "umiQC.bwaMem.slicerR2_jobMemory": null,
+            "umiQC.bwaMem.slicerR2_modules": null,
+            "umiQC.bwaMem.slicerR2_timeout": null,
+            "umiQC.bwaMem.trimMinLength": null,
+            "umiQC.bwaMem.trimMinQuality": null,
+            "umiQC.extractUMIs.memory": null,
+            "umiQC.extractUMIs.modules": "barcodex-rs/0.1.2 rust/1.45.1",
+            "umiQC.extractUMIs.timeout": null,
+            "umiQC.fastq1": {
+                "contents": {
+                    "configuration": "/.mounts/labs/gsi/testdata/umiQC/inputs/r1.fastq",
+                    "externalIds": [
+                        {
+                            "id": "TEST",
+                            "provider": "TEST"
+                        }
+                    ]
+                },
+                "type": "EXTERNAL"
+            },
+            "umiQC.fastq2": {
+                "contents": {
+                    "configuration": "/.mounts/labs/gsi/testdata/umiQC/inputs/r2.fastq",
+                    "externalIds": [
+                        {
+                            "id": "TEST",
+                            "provider": "TEST"
+                        }
+                    ]
+                },
+                "type": "EXTERNAL"
+            },
+            "umiQC.outputPrefix": null,
+            "umiQC.postDedupBamQC.bamQCMetrics_jobMemory": null,
+            "umiQC.postDedupBamQC.bamQCMetrics_modules": null,
+            "umiQC.postDedupBamQC.bamQCMetrics_normalInsertMax": null,
+            "umiQC.postDedupBamQC.bamQCMetrics_refFasta": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa",
+            "umiQC.postDedupBamQC.bamQCMetrics_refSizesBed": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19.chrom.sizes.bed",
+            "umiQC.postDedupBamQC.bamQCMetrics_threads": null,
+            "umiQC.postDedupBamQC.bamQCMetrics_timeout": null,
+            "umiQC.postDedupBamQC.bamQCMetrics_workflowVersion": "4.0.0_TEST",
+            "umiQC.postDedupBamQC.collateResults_jobMemory": null,
+            "umiQC.postDedupBamQC.collateResults_modules": null,
+            "umiQC.postDedupBamQC.collateResults_threads": null,
+            "umiQC.postDedupBamQC.collateResults_timeout": null,
+            "umiQC.postDedupBamQC.countInputReads_jobMemory": null,
+            "umiQC.postDedupBamQC.countInputReads_modules": null,
+            "umiQC.postDedupBamQC.countInputReads_threads": null,
+            "umiQC.postDedupBamQC.countInputReads_timeout": null,
+            "umiQC.postDedupBamQC.cumulativeDistToHistogram_jobMemory": null,
+            "umiQC.postDedupBamQC.cumulativeDistToHistogram_modules": null,
+            "umiQC.postDedupBamQC.cumulativeDistToHistogram_threads": null,
+            "umiQC.postDedupBamQC.cumulativeDistToHistogram_timeout": null,
+            "umiQC.postDedupBamQC.downsampleRegion_jobMemory": null,
+            "umiQC.postDedupBamQC.downsampleRegion_modules": null,
+            "umiQC.postDedupBamQC.downsampleRegion_threads": null,
+            "umiQC.postDedupBamQC.downsampleRegion_timeout": null,
+            "umiQC.postDedupBamQC.downsample_downsampleSuffix": null,
+            "umiQC.postDedupBamQC.downsample_jobMemory": null,
+            "umiQC.postDedupBamQC.downsample_modules": null,
+            "umiQC.postDedupBamQC.downsample_randomSeed": null,
+            "umiQC.postDedupBamQC.downsample_threads": null,
+            "umiQC.postDedupBamQC.downsample_timeout": null,
+            "umiQC.postDedupBamQC.filter_jobMemory": null,
+            "umiQC.postDedupBamQC.filter_minQuality": null,
+            "umiQC.postDedupBamQC.filter_modules": null,
+            "umiQC.postDedupBamQC.filter_threads": null,
+            "umiQC.postDedupBamQC.filter_timeout": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_baseInterval": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_chromosomes": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_customRegions": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_intervalStart": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_jobMemory": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_modules": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_threads": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_threshold": null,
+            "umiQC.postDedupBamQC.findDownsampleParamsMarkDup_timeout": null,
+            "umiQC.postDedupBamQC.findDownsampleParams_jobMemory": null,
+            "umiQC.postDedupBamQC.findDownsampleParams_minReadsAbsolute": null,
+            "umiQC.postDedupBamQC.findDownsampleParams_minReadsRelative": null,
+            "umiQC.postDedupBamQC.findDownsampleParams_modules": null,
+            "umiQC.postDedupBamQC.findDownsampleParams_preDSMultiplier": null,
+            "umiQC.postDedupBamQC.findDownsampleParams_precision": null,
+            "umiQC.postDedupBamQC.findDownsampleParams_targetReads": 100000,
+            "umiQC.postDedupBamQC.findDownsampleParams_threads": null,
+            "umiQC.postDedupBamQC.findDownsampleParams_timeout": null,
+            "umiQC.postDedupBamQC.indexBamFile_jobMemory": null,
+            "umiQC.postDedupBamQC.indexBamFile_modules": null,
+            "umiQC.postDedupBamQC.indexBamFile_threads": null,
+            "umiQC.postDedupBamQC.indexBamFile_timeout": null,
+            "umiQC.postDedupBamQC.markDuplicates_jobMemory": null,
+            "umiQC.postDedupBamQC.markDuplicates_modules": null,
+            "umiQC.postDedupBamQC.markDuplicates_opticalDuplicatePixelDistance": null,
+            "umiQC.postDedupBamQC.markDuplicates_picardMaxMemMb": null,
+            "umiQC.postDedupBamQC.markDuplicates_threads": null,
+            "umiQC.postDedupBamQC.markDuplicates_timeout": null,
+            "umiQC.postDedupBamQC.metadata": {
+                "donor": "Xenomorph",
+                "group id": "Weyland-Yutani",
+                "library design": "WY-1001",
+                "tissue origin": "LV-426",
+                "tissue type": "Claw fragment"
+            },
+            "umiQC.postDedupBamQC.runMosdepth_jobMemory": null,
+            "umiQC.postDedupBamQC.runMosdepth_modules": null,
+            "umiQC.postDedupBamQC.runMosdepth_threads": null,
+            "umiQC.postDedupBamQC.runMosdepth_timeout": null,
+            "umiQC.postDedupBamQC.updateMetadata_jobMemory": null,
+            "umiQC.postDedupBamQC.updateMetadata_modules": null,
+            "umiQC.postDedupBamQC.updateMetadata_threads": null,
+            "umiQC.postDedupBamQC.updateMetadata_timeout": null,
+            "umiQC.preDedupBamQC.bamQCMetrics_jobMemory": null,
+            "umiQC.preDedupBamQC.bamQCMetrics_modules": null,
+            "umiQC.preDedupBamQC.bamQCMetrics_normalInsertMax": null,
+            "umiQC.preDedupBamQC.bamQCMetrics_refFasta": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa",
+            "umiQC.preDedupBamQC.bamQCMetrics_refSizesBed": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19.chrom.sizes.bed",
+            "umiQC.preDedupBamQC.bamQCMetrics_threads": null,
+            "umiQC.preDedupBamQC.bamQCMetrics_timeout": null,
+            "umiQC.preDedupBamQC.bamQCMetrics_workflowVersion": "4.0.0_TEST",
+            "umiQC.preDedupBamQC.collateResults_jobMemory": null,
+            "umiQC.preDedupBamQC.collateResults_modules": null,
+            "umiQC.preDedupBamQC.collateResults_threads": null,
+            "umiQC.preDedupBamQC.collateResults_timeout": null,
+            "umiQC.preDedupBamQC.countInputReads_jobMemory": null,
+            "umiQC.preDedupBamQC.countInputReads_modules": null,
+            "umiQC.preDedupBamQC.countInputReads_threads": null,
+            "umiQC.preDedupBamQC.countInputReads_timeout": null,
+            "umiQC.preDedupBamQC.cumulativeDistToHistogram_jobMemory": null,
+            "umiQC.preDedupBamQC.cumulativeDistToHistogram_modules": null,
+            "umiQC.preDedupBamQC.cumulativeDistToHistogram_threads": null,
+            "umiQC.preDedupBamQC.cumulativeDistToHistogram_timeout": null,
+            "umiQC.preDedupBamQC.downsampleRegion_jobMemory": null,
+            "umiQC.preDedupBamQC.downsampleRegion_modules": null,
+            "umiQC.preDedupBamQC.downsampleRegion_threads": null,
+            "umiQC.preDedupBamQC.downsampleRegion_timeout": null,
+            "umiQC.preDedupBamQC.downsample_downsampleSuffix": null,
+            "umiQC.preDedupBamQC.downsample_jobMemory": null,
+            "umiQC.preDedupBamQC.downsample_modules": null,
+            "umiQC.preDedupBamQC.downsample_randomSeed": null,
+            "umiQC.preDedupBamQC.downsample_threads": null,
+            "umiQC.preDedupBamQC.downsample_timeout": null,
+            "umiQC.preDedupBamQC.filter_jobMemory": null,
+            "umiQC.preDedupBamQC.filter_minQuality": null,
+            "umiQC.preDedupBamQC.filter_modules": null,
+            "umiQC.preDedupBamQC.filter_threads": null,
+            "umiQC.preDedupBamQC.filter_timeout": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_baseInterval": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_chromosomes": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_customRegions": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_intervalStart": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_jobMemory": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_modules": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_threads": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_threshold": null,
+            "umiQC.preDedupBamQC.findDownsampleParamsMarkDup_timeout": null,
+            "umiQC.preDedupBamQC.findDownsampleParams_jobMemory": null,
+            "umiQC.preDedupBamQC.findDownsampleParams_minReadsAbsolute": null,
+            "umiQC.preDedupBamQC.findDownsampleParams_minReadsRelative": null,
+            "umiQC.preDedupBamQC.findDownsampleParams_modules": null,
+            "umiQC.preDedupBamQC.findDownsampleParams_preDSMultiplier": null,
+            "umiQC.preDedupBamQC.findDownsampleParams_precision": null,
+            "umiQC.preDedupBamQC.findDownsampleParams_targetReads": 100000,
+            "umiQC.preDedupBamQC.findDownsampleParams_threads": null,
+            "umiQC.preDedupBamQC.findDownsampleParams_timeout": null,
+            "umiQC.preDedupBamQC.indexBamFile_jobMemory": null,
+            "umiQC.preDedupBamQC.indexBamFile_modules": null,
+            "umiQC.preDedupBamQC.indexBamFile_threads": null,
+            "umiQC.preDedupBamQC.indexBamFile_timeout": null,
+            "umiQC.preDedupBamQC.markDuplicates_jobMemory": null,
+            "umiQC.preDedupBamQC.markDuplicates_modules": null,
+            "umiQC.preDedupBamQC.markDuplicates_opticalDuplicatePixelDistance": null,
+            "umiQC.preDedupBamQC.markDuplicates_picardMaxMemMb": null,
+            "umiQC.preDedupBamQC.markDuplicates_threads": null,
+            "umiQC.preDedupBamQC.markDuplicates_timeout": null,
+            "umiQC.preDedupBamQC.metadata": {
+                "donor": "Xenomorph",
+                "group id": "Weyland-Yutani",
+                "library design": "WY-1001",
+                "tissue origin": "LV-426",
+                "tissue type": "Claw fragment"
+            },
+            "umiQC.preDedupBamQC.runMosdepth_jobMemory": null,
+            "umiQC.preDedupBamQC.runMosdepth_modules": null,
+            "umiQC.preDedupBamQC.runMosdepth_threads": null,
+            "umiQC.preDedupBamQC.runMosdepth_timeout": null,
+            "umiQC.preDedupBamQC.updateMetadata_jobMemory": null,
+            "umiQC.preDedupBamQC.updateMetadata_modules": null,
+            "umiQC.preDedupBamQC.updateMetadata_threads": null,
+            "umiQC.preDedupBamQC.updateMetadata_timeout": null,
+            "umiQC.umiDeduplications.memory": null,
+            "umiQC.umiDeduplications.modules": "umi-tools/1.0.0 samtools/1.9",
+            "umiQC.umiDeduplications.outputPrefixEight": null,
+            "umiQC.umiDeduplications.outputPrefixSeven": null,
+            "umiQC.umiDeduplications.outputPrefixSix": null,
+            "umiQC.umiDeduplications.timeout": null,
+            "umiQC.umiList": {
+                "contents": {
+                    "configuration": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt",
+                    "externalIds": [
+                        {
+                            "id": "TEST",
+                            "provider": "TEST"
+                        }
+                    ]
+                },
+                "type": "EXTERNAL"
+            }
+        },
+        "description": "UmiQC workflow test",
+        "engineArguments": {},
+        "id": "umiQC_dataset1",
+        "metadata": {
+            "umiQC.extractionMetrics": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "umiQC.postDedupBamMetrics": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "umiQC.preDedupBamMetrics": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "umiQC.umiCounts": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "umiQC.umiMetricsEight": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "umiQC.umiMetricsSeven": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "umiQC.umiMetricsSix": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            }
+        },
+        "validators": [
+            {
+                "metrics_calculate": "@CHECKOUT@/./calculate.sh",
+                "metrics_compare": "@CHECKOUT@/./compare.sh",
+                "output_metrics": "/.mounts/labs/gsi/testdata/umiQC/output_metrics/umiQC_dataset1.metrics",
+                "type": "script"
+            }
+        ]
+    }
+]
