@@ -5,10 +5,12 @@ import "imports/pull_bamQC.wdl" as bamQC
 
 workflow umiQC {
     input {
-        File umiList
+        String umiList
         String outputPrefix = "output"
-        File fastq1
-        File fastq2
+        String fastq1
+        String fastq2
+	String pattern1 
+	String pattern2 
     }
 
     parameter_meta {
@@ -16,11 +18,13 @@ workflow umiQC {
         outputPrefix: "Specifies the start of output files"
         fastq1: "Fastq file for read 1"
         fastq2: "Fastq file for read 2"
+	pattern1: "UMI pattern 1"
+	pattern2: "UMI pattern 2"
     }
 
     meta {
-        author: "Michelle Feng"
-        email: "mfeng@oicr.on.ca"
+        author: "Michelle Feng and Murto Hilali"
+        email: "mfeng@oicr.on.ca and mhilali@oicr.on.ca"
         description: "QC workflow to assess UMI components"
         dependencies: [
             {
@@ -84,7 +88,9 @@ workflow umiQC {
             umiList = umiList,
             outputPrefix = outputPrefix,
             fastq1 = fastq1,
-            fastq2 = fastq2
+            fastq2 = fastq2,
+	    pattern1 = pattern1,
+	    pattern2 = pattern2
     }
 
     call bwaMem.bwaMem {
@@ -143,6 +149,8 @@ task extractUMIs {
             String outputPrefix
             File fastq1
             File fastq2
+ 	    String pattern1
+            String pattern2
             String modules = "barcodex-rs/0.1.2 rust/1.45.1"
             Int memory = 24
             Int timeout = 12
@@ -153,6 +161,8 @@ task extractUMIs {
             outputPrefix: "Specifies the start of the output files"
             fastqR1: "FASTQ file containing read 1"
             fastqR2: "FASTQ file containing read 2"
+	    pattern1: "UMI RegEx pattern 1"
+	    pattern2: "UMI RegEx pattern 2"
             modules: "Required environment modules"
             memory: "Memory allocated for this job"
             timeout: "Time in hours before task timeout"
@@ -160,8 +170,8 @@ task extractUMIs {
 
         command <<<
             barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
-            --pattern1 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r1-in ~{fastq1} \
-            --pattern2 "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)" --r2-in ~{fastq2} 
+            --pattern1 '~{pattern1}' --r1-in ~{fastq1} \
+            --pattern2 '~{pattern2}' --r2-in ~{fastq2} 
         >>>
 
         runtime {
@@ -185,6 +195,8 @@ task extractUMIs {
             output_meta: {
                 fastqR1: "Read 1 fastq file with UMIs extracted",
                 fastqR2: "Read 2 fastq file with UMIs extracted",
+		pattern1: "UMI kit pattern 1",
+		pattern2: "UMI kit pattern 2",
                 discardR1: "Reads without a matching UMI pattern in read 1",
                 discardR2: "Reads without a matching UMI pattern in read 2",
                 extractR1: "Extracted reads (UMIs and any spacer sequences) from read 1",
