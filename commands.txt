@@ -5,7 +5,7 @@ This section lists command(s) run by umiQC workflow
 
 QC workflow to assess UMI components.
 
-### Get lengths of paired-end UMIs from kit.
+### Get lengths of paired-end UMIs from kit
 
 ```
 
@@ -24,7 +24,7 @@ QC workflow to assess UMI components.
       umiLengths=($(tr ' ' '\n' <<< "${L[@]}" | awk '!u[$0]++' | tr ' ' '\n'))
       printf "%s\n" "${umiLengths[@]}"
 
-  ```
+```
 
 ### Extracting UMIs from FASTQ files
 
@@ -33,7 +33,7 @@ QC workflow to assess UMI components.
             barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
             --pattern1 '~{pattern1}' --r1-in ~{fastq1} \
             --pattern2 '~{pattern2}' --r2-in ~{fastq2} 
-        ```
+```
 
 ### Splitting and deduplicating BAM files based on UMI lengths
 
@@ -48,7 +48,7 @@ QC workflow to assess UMI components.
         --group-out=~{outputPrefix}.~{umiLength}.umi_groups.tsv \
         --output-bam > ~{outputPrefix}.~{umiLength}.dedup.bam \
         --log=group.log --paired | samtools view
-    ```
+```
 
 ### Merge UMI metrics into one TSV file
 
@@ -67,10 +67,10 @@ QC workflow to assess UMI components.
             i=$(( $i+1 ))
         done
         tr -s '[ , 	]' '\t' < mergedUMIMetrics.tsv > tmp.tsv && mv tmp.tsv mergedUMIMetrics.tsv 
-    ```
+```
 ### Merge deduplicated BAM files
 
 ```        
         set -euo pipefail
         samtools merge -c ~{outputPrefix}.dedup.bam ~{sep=" " umiDedupBams}
-    ```
+```
