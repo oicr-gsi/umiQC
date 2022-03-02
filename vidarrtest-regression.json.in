@@ -50,9 +50,9 @@
             "umiQC.pattern2": "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)",
 			"umiQC.postDedupBamQC.bamQCMetrics_jobMemory": null,
 			"umiQC.postDedupBamQC.bamQCMetrics_modules": null,
-			"umiQC.postDedupBamQC.bamQCMetrics_normalInsertMax": "Int (optional, default = 1500)",
-			"umiQC.postDedupBamQC.bamQCMetrics_refFasta": "String",
-			"umiQC.postDedupBamQC.bamQCMetrics_refSizesBed": "String",
+			"umiQC.postDedupBamQC.bamQCMetrics_normalInsertMax": null,
+			"umiQC.postDedupBamQC.bamQCMetrics_refFasta": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19_random.fa",
+			"umiQC.postDedupBamQC.bamQCMetrics_refSizesBed": "/.mounts/labs/gsi/modulator/sw/data/hg19-p13/hg19.chrom.sizes.bed",
 			"umiQC.postDedupBamQC.bamQCMetrics_threads": null,
 			"umiQC.postDedupBamQC.bamQCMetrics_timeout": null,
 			"umiQC.postDedupBamQC.bamQCMetrics_workflowVersion": "4.0.0_TEST",
@@ -207,7 +207,10 @@
 			"umiQC.umiList": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt"
 		},
 		"description": "UmiQC workflow test",
-        "engineArguments": {},
+        "engineArguments": {
+			"write_to_cache": false,
+			"read_from_cache": false
+		},
         "id": "umiQC_dataset1",
 		"metadata": {
             "umiQC.extractionMetrics": {
