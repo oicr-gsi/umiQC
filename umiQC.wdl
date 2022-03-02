@@ -40,8 +40,8 @@ workflow umiQC {
                 url: "https://github.com/CGATOxford/UMI-tools/archive/1.1.1.tar.gz"
             },
             {
-            name: "bwa/0.7.12",
-            url: "https://github.com/lh3/bwa/archive/0.7.12.tar.gz"
+                name: "bwa/0.7.12",
+                url: "https://github.com/lh3/bwa/archive/0.7.12.tar.gz"
             },
             {
                 name: "samtools/1.9",
@@ -73,11 +73,11 @@ workflow umiQC {
             }
         ]
         output_meta: {
-            umiCounts: "Record of UMI counts after extraction",
-            extractionMetrics: "Metrics relating to extraction process",
-            preDedupBamMetrics: "BamQC report on bam file pre-deduplication",
+            umiCounts: "JSON record of UMI counts after extraction",
+            extractionMetrics: "JSON of metrics relating to extraction process",
+            preDedupBamMetrics: "BamQC JSON report on bam file pre-deduplication",
             mergedUMIMetrics: "TSV of files mapping read id to read group",
-            postDedupBamMetrics: "BamQC report on bam file post-deduplication"
+            postDedupBamMetrics: "BamQC JSON report on bam file post-deduplication"
         }
     }
 
@@ -148,8 +148,6 @@ workflow umiQC {
         File preDedupBamMetrics = preDedupBamQC.result
 
         # umi-tools metrics
-        #Array[File] umiMetrics = bamSplitDeduplication.umiMetrics
-        
         File mergedUMIMetrics = mergeUMIs.mergedUMIMetrics
 
         # post-collapse bamqc metrics
@@ -174,6 +172,8 @@ task getUMILengths {
       do
           for j in ${k[@]}
           do
+              # adding 1 to account for period in UMI
+              # 'ATG.ATCG'
               L+=($(($i+$j+1)))
           done
       done
@@ -188,6 +188,12 @@ task getUMILengths {
     Array[Int] umiLengths = read_lines(stdout())
 
   }
+
+  meta {
+            output_meta: {
+                umiLengths: "An integer array of UMI lengths"
+            }
+        }
 
 }
 
