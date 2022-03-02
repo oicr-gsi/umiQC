@@ -1,6 +1,6 @@
 [			
 	{	
-		arguments: {
+		"arguments": {
 			"umiQC.bamMerge.memory": null,
 			"umiQC.bamMerge.modules": "samtools/1.9",
 			"umiQC.bamMerge.timeout": null,
@@ -47,7 +47,7 @@
 			"umiQC.fastq2": "/.mounts/labs/gsi/testdata/umiQC/inputs/r2.fastq",
 			"umiQC.outputPrefix": null,
 			"umiQC.pattern1": "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)",
-            "umiQC.pattern2": "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)"
+            "umiQC.pattern2": "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)",
 			"umiQC.postDedupBamQC.bamQCMetrics_jobMemory": null,
 			"umiQC.postDedupBamQC.bamQCMetrics_modules": null,
 			"umiQC.postDedupBamQC.bamQCMetrics_normalInsertMax": "Int (optional, default = 1500)",
@@ -65,7 +65,7 @@
 			"umiQC.postDedupBamQC.countInputReads_threads": null,
 			"umiQC.postDedupBamQC.countInputReads_timeout": null,
 			"umiQC.postDedupBamQC.cumulativeDistToHistogram_jobMemory": null,
-			"umiQC.postDedupBamQC.cumulativeDistToHistogram_modules": null
+			"umiQC.postDedupBamQC.cumulativeDistToHistogram_modules": null,
 			"umiQC.postDedupBamQC.cumulativeDistToHistogram_threads": null,
 			"umiQC.postDedupBamQC.cumulativeDistToHistogram_timeout": null,
 			"umiQC.postDedupBamQC.downsampleRegion_jobMemory": null,
@@ -85,7 +85,7 @@
 			"umiQC.postDedupBamQC.filter_timeout": null,
 			"umiQC.postDedupBamQC.findDownsampleParamsMarkDup_baseInterval": null,
 			"umiQC.postDedupBamQC.findDownsampleParamsMarkDup_chromosomes": null,
-			"umiQC.postDedupBamQC.findDownsampleParamsMarkDup_customRegions": null
+			"umiQC.postDedupBamQC.findDownsampleParamsMarkDup_customRegions": null,
 			"umiQC.postDedupBamQC.findDownsampleParamsMarkDup_intervalStart": null,
 			"umiQC.postDedupBamQC.findDownsampleParamsMarkDup_jobMemory": null,
 			"umiQC.postDedupBamQC.findDownsampleParamsMarkDup_modules": null,
@@ -141,7 +141,7 @@
 			"umiQC.preDedupBamQC.countInputReads_jobMemory": null,
 			"umiQC.preDedupBamQC.countInputReads_modules": null,
 			"umiQC.preDedupBamQC.countInputReads_threads": null,
-			"umiQC.preDedupBamQC.countInputReads_timeout": null
+			"umiQC.preDedupBamQC.countInputReads_timeout": null,
 			"umiQC.preDedupBamQC.cumulativeDistToHistogram_jobMemory": null,
 			"umiQC.preDedupBamQC.cumulativeDistToHistogram_modules": null,
 			"umiQC.preDedupBamQC.cumulativeDistToHistogram_threads": null,
@@ -204,7 +204,7 @@
 			"umiQC.preDedupBamQC.updateMetadata_modules": null,
 			"umiQC.preDedupBamQC.updateMetadata_threads": null,
 			"umiQC.preDedupBamQC.updateMetadata_timeout": null,
-			"umiQC.umiList": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt",
+			"umiQC.umiList": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt"
 		},
 		"description": "UmiQC workflow test",
         "engineArguments": {},
