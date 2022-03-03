@@ -7,14 +7,14 @@ workflow umiQC {
     input {
         String umiList
         String outputPrefix = "output"
-        String fastq1
-        String fastq2
-	    String pattern1 
-	    String pattern2
+        File fastq1
+        File fastq2
+        String pattern1 
+        String pattern2
     }
 
     parameter_meta {
-        umiList: "File with valid UMIs"
+        umiList: "Reference ile with valid UMIs"
         outputPrefix: "Specifies the start of output files"
         fastq1: "Fastq file for read 1"
         fastq2: "Fastq file for read 2"
@@ -199,7 +199,7 @@ task getUMILengths {
 
 task extractUMIs {
         input {
-            File umiList
+            String umiList
             String outputPrefix
             File fastq1
             File fastq2
@@ -211,10 +211,10 @@ task extractUMIs {
         }
 
         parameter_meta {
-            umiList: "File with valid UMIs"
+            umiList: "Reference file with valid UMIs"
             outputPrefix: "Specifies the start of the output files"
-            fastqR1: "FASTQ file containing read 1"
-            fastqR2: "FASTQ file containing read 2"
+            fastq1: "FASTQ file containing read 1"
+            fastq2: "FASTQ file containing read 2"
             pattern1: "UMI RegEx pattern 1"
             pattern2: "UMI RegEx pattern 2"
             modules: "Required environment modules"
