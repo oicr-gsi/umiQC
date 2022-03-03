@@ -1,6 +1,6 @@
 [            
-	{	
-		"arguments": {
+    {    
+        "arguments": {
             "umiQC.bamMerge.memory": null,
             "umiQC.bamMerge.modules": "samtools/1.9",
             "umiQC.bamMerge.timeout": null,
@@ -205,14 +205,14 @@
             "umiQC.preDedupBamQC.updateMetadata_threads": null,
             "umiQC.preDedupBamQC.updateMetadata_timeout": null,
             "umiQC.umiList": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt"
-		},
-		"description": "UmiQC workflow test",
+        },
+        "description": "UmiQC workflow test",
         "engineArguments": {
             "write_to_cache": false,
             "read_from_cache": false
-		},
+        },
         "id": "umiQC_dataset1",
-		"metadata": {
+        "metadata": {
             "umiQC.extractionMetrics": {
                 "contents": [
                     {
@@ -254,7 +254,7 @@
                 "type": "ALL"
             }
         },
-		"validators": [
+        "validators": [
             {
                 "metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
                 "metrics_compare": "@CHECKOUT@/tests/compare.sh",
@@ -262,5 +262,5 @@
                 "type": "script"
             }
         ]
-	}
+    }
 ]
