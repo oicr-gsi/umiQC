@@ -227,6 +227,12 @@ task extractUMIs {
             barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
             --pattern1 '~{pattern1}' --r1-in ~{fastq1} \
             --pattern2 '~{pattern2}' --r2-in ~{fastq2} 
+
+            cat ~{outputPrefix}_UMI_counts.json > umiCounts.txt
+
+            tr [,] ',\n' < umiCounts.txt | sed 's/[{}]//' > tmp.txt
+            echo "{$(sort -i tmp.txt)}" > new.txt
+            tr '\n' ',' < new.txt | sed 's/,$//' > ~{outputPrefix}_UMI_counts.json
         >>>
 
         runtime {
@@ -329,15 +335,16 @@ task mergeUMIs {
 
         i=0
 
-        awk 'NR==1' ${umiMetrics[i]} > mergedUMIMetrics.tsv
+        awk 'NR==1' ${umiMetrics[i]} > starter.tsv
         while [ $i -le $length ]
         do
-            gawk -i inplace '(NR>1) { match($7, "([ACTG.])+") ;  $9=RLENGTH-1"."$9 ; print}' ${umiMetrics[i]}
+            sort -k9 -n ${umiMetrics[i]} > tmp.tsv
+            gawk -i inplace '(NR>1) { match($7, "([ACTG.])+") ;  $9=RLENGTH-1"."$9 ; print}' tmp.tsv
     
-            cat ${umiMetrics[i]} >> mergedUMIMetrics.tsv
+            tail -n +2 tmp.tsv >> starter.tsv
             i=$(( $i+1 ))
         done
-        tr -s '[ , 	]' '\t' < mergedUMIMetrics.tsv > tmp.tsv && mv tmp.tsv mergedUMIMetrics.tsv 
+        sed -e 's/\s\+/\t/g' starter.tsv > mergedUMIMetrics.tsv 
     >>>
 
     output {

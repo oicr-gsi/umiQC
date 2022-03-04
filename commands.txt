@@ -33,6 +33,12 @@ QC workflow to assess UMI components.
             barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
             --pattern1 '~{pattern1}' --r1-in ~{fastq1} \
             --pattern2 '~{pattern2}' --r2-in ~{fastq2} 
+
+            cat ~{outputPrefix}_UMI_counts.json > umiCounts.txt
+
+            tr [,] ',\n' < umiCounts.txt | sed 's/[{}]//' > tmp.txt
+            echo "{$(sort -i tmp.txt)}" > new.txt
+            tr '\n' ',' < new.txt | sed 's/,$//' > ~{outputPrefix}_UMI_counts.json
 ```
 
 ### Splitting and deduplicating BAM files based on UMI lengths
