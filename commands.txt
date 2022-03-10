@@ -1,0 +1,82 @@
+## Commands
+This section lists command(s) run by umiQC workflow
+
+* Running umiQC
+
+QC workflow to assess UMI components.
+
+### Get lengths of paired-end UMIs from kit
+
+```
+
+      k=($(awk '{ match($1, "([ACTG])+"); print RLENGTH }' ~{umiList} | uniq))
+
+      for i in ${k[@]}
+      do
+          for j in ${k[@]}
+          do
+              # adding 1 to account for period in UMI
+              # 'ATG.ATCG'
+              L+=($(($i+$j+1)))
+          done
+      done
+
+      umiLengths=($(tr ' ' '\n' <<< "${L[@]}" | awk '!u[$0]++' | tr ' ' '\n'))
+      printf "%s\n" "${umiLengths[@]}"
+
+```
+
+### Extracting UMIs from FASTQ files
+
+```
+
+            barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
+            --pattern1 '~{pattern1}' --r1-in ~{fastq1} \
+            --pattern2 '~{pattern2}' --r2-in ~{fastq2} 
+
+            cat ~{outputPrefix}_UMI_counts.json > umiCounts.txt
+
+            tr [,] ',\n' < umiCounts.txt | sed 's/[{}]//' > tmp.txt
+            echo "{$(sort -i tmp.txt)}" > new.txt
+            tr '\n' ',' < new.txt | sed 's/,$//' > ~{outputPrefix}_UMI_counts.json
+```
+
+### Splitting and deduplicating BAM files based on UMI lengths
+
+```
+        samtools view -H ~{bamFile} > ~{outputPrefix}.~{umiLength}.sam
+        samtools view ~{bamFile} | grep -P "^.*__\S{~{umiLength}}\t" >> ~{outputPrefix}.~{umiLength}.sam
+        samtools view -Sb ~{outputPrefix}.~{umiLength}.sam > ~{outputPrefix}.~{umiLength}.bam
+
+        samtools index ~{outputPrefix}.~{umiLength}.bam
+
+        umi_tools group -I ~{outputPrefix}.~{umiLength}.bam \
+        --group-out=~{outputPrefix}.~{umiLength}.umi_groups.tsv \
+        --output-bam > ~{outputPrefix}.~{umiLength}.dedup.bam \
+        --log=group.log --paired | samtools view
+```
+
+### Merge UMI metrics into one TSV file
+
+```
+        umiMetrics=(~{sep=" " umiMetrics})
+        length=${#umiMetrics[@]}
+
+        i=0
+
+        awk 'NR==1' ${umiMetrics[i]} > mergedUMIMetrics.tsv
+        while [ $i -le $length ]
+        do
+            gawk -i inplace '(NR>1) { match($7, "([ACTG.])+") ;  $9=RLENGTH-1"."$9 ; print}' ${umiMetrics[i]}
+    
+            cat ${umiMetrics[i]} >> mergedUMIMetrics.tsv
+            i=$(( $i+1 ))
+        done
+        tr -s '[ , 	]' '\t' < mergedUMIMetrics.tsv > tmp.tsv && mv tmp.tsv mergedUMIMetrics.tsv 
+```
+### Merge deduplicated BAM files
+
+```        
+        set -euo pipefail
+        samtools merge -c ~{outputPrefix}.dedup.bam ~{sep=" " umiDedupBams}
+```

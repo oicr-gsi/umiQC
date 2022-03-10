@@ -31,9 +31,11 @@ java -jar cromwell.jar run umiQC.wdl --inputs inputs.json
 #### Required workflow parameters:
 Parameter|Value|Description
 ---|---|---
-`umiList`|File|File with valid UMIs
+`umiList`|String|Reference ile with valid UMIs
 `fastq1`|File|Fastq file for read 1
 `fastq2`|File|Fastq file for read 2
+`pattern1`|String|UMI pattern 1
+`pattern2`|String|UMI pattern 2
 `bwaMem.runBwaMem_bwaRef`|String|The reference genome to align the sample with by BWA
 `bwaMem.runBwaMem_modules`|String|Required environment modules
 `bwaMem.readGroups`|String|Complete read group header line
@@ -50,7 +52,7 @@ Parameter|Value|Description
 #### Optional workflow parameters:
 Parameter|Value|Default|Description
 ---|---|---|---
-`outputFileNamePrefix`|String|"output"|Specifies the start of output files
+`outputPrefix`|String|"output"|Specifies the start of output files
 
 
 #### Optional task parameters:
@@ -157,9 +159,12 @@ Parameter|Value|Default|Description
 `preDedupBamQC.filter_jobMemory`|Int|16|Memory allocated for this job
 `preDedupBamQC.filter_modules`|String|"samtools/1.9"|required environment modules
 `preDedupBamQC.filter_minQuality`|Int|30|Minimum alignment quality to pass filter
-`umiDeduplication.modules`|String|"umi-tools/1.0.0"|Required environment modules
-`umiDeduplication.memory`|Int|24|Memory allocated for this job
-`umiDeduplication.timeout`|Int|6|Time in hours before task timeout
+`bamSplitDeduplication.modules`|String|"umi-tools/1.0.0 samtools/1.9"|Required environment modules
+`bamSplitDeduplication.memory`|Int|24|Memory allocated for this job
+`bamSplitDeduplication.timeout`|Int|6|Time in hours before task timeout
+`bamMerge.modules`|String|"samtools/1.9"|Required environment modules
+`bamMerge.memory`|Int|24|Memory allocated for indexing job
+`bamMerge.timeout`|Int|6|Hours before task timeout
 `postDedupBamQC.collateResults_timeout`|Int|1|hours before task timeout
 `postDedupBamQC.collateResults_threads`|Int|4|Requested CPU threads
 `postDedupBamQC.collateResults_jobMemory`|Int|8|Memory allocated for this job
@@ -234,38 +239,95 @@ Parameter|Value|Default|Description
 
 Output | Type | Description
 ---|---|---
-`umiCounts`|File|Record of UMI counts after extraction
-`extractionMetrics`|File|Metrics relating to extraction process
-`preDedupBamMetrics`|File|BamQC report on bam file pre-deduplication
-`umiGroups`|File|File mapping read id to read group
-`postDedupBamMetrics`|File|BamQC report on bam file post-deduplication
+`umiCounts`|File|JSON record of UMI counts after extraction
+`extractionMetrics`|File|JSON of metrics relating to extraction process
+`preDedupBamMetrics`|File|BamQC JSON report on bam file pre-deduplication
+`mergedUMIMetrics`|File|TSV of files mapping read id to read group
+`postDedupBamMetrics`|File|BamQC JSON report on bam file post-deduplication
 
 
-## Niassa + Cromwell
+## Commands
+ This section lists command(s) run by umiQC workflow
+ 
+ * Running umiQC
+ 
+ QC workflow to assess UMI components.
+ 
+ ### Get lengths of paired-end UMIs from kit
+ 
+ ```
+ 
+       k=($(awk '{ match($1, "([ACTG])+"); print RLENGTH }' ~{umiList} | uniq))
+ 
+       for i in ${k[@]}
+       do
+           for j in ${k[@]}
+           do
+               # adding 1 to account for period in UMI
+               # 'ATG.ATCG'
+               L+=($(($i+$j+1)))
+           done
+       done
+ 
+       umiLengths=($(tr ' ' '\n' <<< "${L[@]}" | awk '!u[$0]++' | tr ' ' '\n'))
+       printf "%s\n" "${umiLengths[@]}"
+ 
+ ```
+ 
+ ### Extracting UMIs from FASTQ files and sorting UMI counts json
+ 
+ ```
+             barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
+             --pattern1 '~{pattern1}' --r1-in ~{fastq1} \
+             --pattern2 '~{pattern2}' --r2-in ~{fastq2} 
 
-This WDL workflow is wrapped in a Niassa workflow (https://github.com/oicr-gsi/pipedev/tree/master/pipedev-niassa-cromwell-workflow) so that it can used with the Niassa metadata tracking system (https://github.com/oicr-gsi/niassa).
+             cat ~{outputPrefix}_UMI_counts.json > umiCounts.txt
 
-* Building
-```
-mvn clean install
-```
-
-* Testing
-```
-mvn clean verify \
--Djava_opts="-Xmx1g -XX:+UseG1GC -XX:+UseStringDeduplication" \
--DrunTestThreads=2 \
--DskipITs=false \
--DskipRunITs=false \
--DworkingDirectory=/path/to/tmp/ \
--DschedulingHost=niassa_oozie_host \
--DwebserviceUrl=http://niassa-url:8080 \
--DwebserviceUser=niassa_user \
--DwebservicePassword=niassa_user_password \
--Dcromwell-host=http://cromwell-url:8000
-```
-
-## Support
+            tr [,] ',\n' < umiCounts.txt | sed 's/[{}]//' > tmp.txt
+            echo "{$(sort -i tmp.txt)}" > new.txt
+            tr '\n' ',' < new.txt | sed 's/,$//' > ~{outputPrefix}_UMI_counts.json
+ ```
+ 
+ ### Splitting and deduplicating BAM files based on UMI lengths
+ 
+ ```
+         samtools view -H ~{bamFile} > ~{outputPrefix}.~{umiLength}.sam
+         samtools view ~{bamFile} | grep -P "^.*__\S{~{umiLength}}\t" >> ~{outputPrefix}.~{umiLength}.sam
+         samtools view -Sb ~{outputPrefix}.~{umiLength}.sam > ~{outputPrefix}.~{umiLength}.bam
+ 
+         samtools index ~{outputPrefix}.~{umiLength}.bam
+ 
+         umi_tools group -I ~{outputPrefix}.~{umiLength}.bam \
+         --group-out=~{outputPrefix}.~{umiLength}.umi_groups.tsv \
+         --output-bam > ~{outputPrefix}.~{umiLength}.dedup.bam \
+         --log=group.log --paired | samtools view
+ ```
+ 
+ ### Merge UMI metrics into one TSV file
+ 
+ ```
+         umiMetrics=(~{sep=" " umiMetrics})
+         length=${#umiMetrics[@]}
+ 
+         i=0
+ 
+         awk 'NR==1' ${umiMetrics[i]} > mergedUMIMetrics.tsv
+         while [ $i -le $length ]
+         do
+             gawk -i inplace '(NR>1) { match($7, "([ACTG.])+") ;  $9=RLENGTH-1"."$9 ; print}' ${umiMetrics[i]}
+     
+             cat ${umiMetrics[i]} >> mergedUMIMetrics.tsv
+             i=$(( $i+1 ))
+         done
+         tr -s '[ , 	]' '\t' < mergedUMIMetrics.tsv > tmp.tsv && mv tmp.tsv mergedUMIMetrics.tsv 
+ ```
+ ### Merge deduplicated BAM files
+ 
+ ```        
+         set -euo pipefail
+         samtools merge -c ~{outputPrefix}.dedup.bam ~{sep=" " umiDedupBams}
+ ``` 
+ ## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
 

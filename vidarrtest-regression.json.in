@@ -1,28 +1,28 @@
-[
-    {
+[            
+    {    
         "arguments": {
-            "umiQC.bamSplit.memory": null,
-            "umiQC.bamSplit.modules": "samtools/1.9",
-            "umiQC.bamSplit.outputPrefixEight": null,
-            "umiQC.bamSplit.outputPrefixSeven": null,
-            "umiQC.bamSplit.outputPrefixSix": null,
-            "umiQC.bamSplit.timeout": null,
+            "umiQC.bamMerge.memory": null,
+            "umiQC.bamMerge.modules": "samtools/1.9",
+            "umiQC.bamMerge.timeout": null,
+            "umiQC.bamSplitDeduplication.memory": null,
+            "umiQC.bamSplitDeduplication.modules": "umi-tools/1.0.0 samtools/1.9",
+            "umiQC.bamSplitDeduplication.timeout": null,
             "umiQC.bwaMem.adapter1": null,
             "umiQC.bwaMem.adapter2": null,
             "umiQC.bwaMem.adapterTrimmingLog_jobMemory": null,
             "umiQC.bwaMem.adapterTrimmingLog_timeout": null,
             "umiQC.bwaMem.adapterTrimming_addParam": null,
             "umiQC.bwaMem.adapterTrimming_jobMemory": null,
-            "umiQC.bwaMem.adapterTrimming_modules": null,
+            "umiQC.bwaMem.adapterTrimming_modules": "cutadapt/1.8.3",
             "umiQC.bwaMem.adapterTrimming_timeout": null,
             "umiQC.bwaMem.bamMerge_jobMemory": null,
-            "umiQC.bwaMem.bamMerge_modules": null,
+            "umiQC.bwaMem.bamMerge_modules": "samtools/1.9",
             "umiQC.bwaMem.bamMerge_timeout": null,
             "umiQC.bwaMem.countChunkSize_jobMemory": null,
             "umiQC.bwaMem.countChunkSize_timeout": null,
             "umiQC.bwaMem.doTrim": null,
             "umiQC.bwaMem.indexBam_jobMemory": null,
-            "umiQC.bwaMem.indexBam_modules": null,
+            "umiQC.bwaMem.indexBam_modules": "samtools/1.9",
             "umiQC.bwaMem.indexBam_timeout": null,
             "umiQC.bwaMem.numChunk": null,
             "umiQC.bwaMem.readGroups": "'@RG\\tID:1\\tLB:neat_5x_EX_hg19_golden\\tPL:illumina\\tPU:run_barcode\\tSM:neat_5x_EX_hg19_golden'",
@@ -68,6 +68,8 @@
                 "type": "EXTERNAL"
             },
             "umiQC.outputPrefix": null,
+            "umiQC.pattern1": "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)",
+            "umiQC.pattern2": "(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)",
             "umiQC.postDedupBamQC.bamQCMetrics_jobMemory": null,
             "umiQC.postDedupBamQC.bamQCMetrics_modules": null,
             "umiQC.postDedupBamQC.bamQCMetrics_normalInsertMax": null,
@@ -224,27 +226,13 @@
             "umiQC.preDedupBamQC.updateMetadata_modules": null,
             "umiQC.preDedupBamQC.updateMetadata_threads": null,
             "umiQC.preDedupBamQC.updateMetadata_timeout": null,
-            "umiQC.umiDeduplications.memory": null,
-            "umiQC.umiDeduplications.modules": "umi-tools/1.0.0 samtools/1.9",
-            "umiQC.umiDeduplications.outputPrefixEight": null,
-            "umiQC.umiDeduplications.outputPrefixSeven": null,
-            "umiQC.umiDeduplications.outputPrefixSix": null,
-            "umiQC.umiDeduplications.timeout": null,
-            "umiQC.umiList": {
-                "contents": {
-                    "configuration": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt",
-                    "externalIds": [
-                        {
-                            "id": "TEST",
-                            "provider": "TEST"
-                        }
-                    ]
-                },
-                "type": "EXTERNAL"
-            }
+            "umiQC.umiList": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt"
         },
         "description": "UmiQC workflow test",
-        "engineArguments": {},
+        "engineArguments": {
+            "write_to_cache": false,
+            "read_from_cache": false
+        },
         "id": "umiQC_dataset1",
         "metadata": {
             "umiQC.extractionMetrics": {
@@ -279,23 +267,7 @@
                 ],
                 "type": "ALL"
             },
-            "umiQC.umiMetricsEight": {
-                "contents": [
-                    {
-                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
-                    }
-                ],
-                "type": "ALL"
-            },
-            "umiQC.umiMetricsSeven": {
-                "contents": [
-                    {
-                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
-                    }
-                ],
-                "type": "ALL"
-            },
-            "umiQC.umiMetricsSix": {
+            "umiQC.mergedUMIMetrics": {
                 "contents": [
                     {
                         "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
@@ -306,9 +278,9 @@
         },
         "validators": [
             {
-                "metrics_calculate": "@CHECKOUT@/./calculate.sh",
-                "metrics_compare": "@CHECKOUT@/./compare.sh",
-                "output_metrics": "/.mounts/labs/gsi/testdata/umiQC/output_metrics/umiQC_dataset1.metrics",
+                "metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
+                "metrics_compare": "@CHECKOUT@/tests/compare.sh",
+                "output_metrics": "/.mounts/labs/gsi/testdata/umiQC/output_metrics/1.0.2/umiQC_dataset1.metrics",
                 "type": "script"
             }
         ]
