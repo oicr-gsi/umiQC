@@ -43,6 +43,7 @@
             "umiQC.extractUMIs.memory": null,
             "umiQC.extractUMIs.modules": "barcodex-rs/0.1.2 rust/1.45.1",
             "umiQC.extractUMIs.timeout": null,
+            "umiQC.mergeUMIs.memory": null,
             "umiQC.fastq1": {
                 "contents": {
                     "configuration": "/.mounts/labs/gsi/testdata/umiQC/inputs/r1.fastq",
