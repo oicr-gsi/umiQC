@@ -321,11 +321,12 @@ task bamSplitDeduplication {
 task mergeUMIs {
     input {
         Array[File] umiMetrics
+        Int memory = 16
     }
 
     parameter_meta {
         umiMetrics: "An array of TSV files with UMI metrics"
-
+        memory: "Memory allocated for this job"
     }
 
     command <<<
@@ -346,7 +347,9 @@ task mergeUMIs {
         done
         sed -e 's/\s\+/\t/g' starter.tsv > mergedUMIMetrics.tsv 
     >>>
-
+    runtime {
+        memory: "~{memory}G"
+    }
     output {
         File mergedUMIMetrics = "mergedUMIMetrics.tsv"
     }
