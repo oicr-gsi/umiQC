@@ -76,7 +76,6 @@ workflow umiQC {
             umiCounts: "JSON record of UMI counts after extraction",
             extractionMetrics: "JSON of metrics relating to extraction process",
             preDedupBamMetrics: "BamQC JSON report on bam file pre-deduplication",
-            mergedUMIMetrics: "TSV of files mapping read id to read group",
             postDedupBamMetrics: "BamQC JSON report on bam file post-deduplication"
         }
     }
@@ -122,10 +121,6 @@ workflow umiQC {
         }
     }
 
-    call mergeUMIs {
-        input:
-            umiMetrics = bamSplitDeduplication.umiMetrics,
-    }
 
     call bamMerge {
         input:
@@ -146,9 +141,6 @@ workflow umiQC {
 
         # pre-collapse bamqc metrics
         File preDedupBamMetrics = preDedupBamQC.result
-
-        # umi-tools metrics
-        File mergedUMIMetrics = mergeUMIs.mergedUMIMetrics
 
         # post-collapse bamqc metrics
         File postDedupBamMetrics = postDedupBamQC.result
@@ -293,10 +285,8 @@ task bamSplitDeduplication {
 
         samtools index ~{outputPrefix}.~{umiLength}.bam
 
-        umi_tools group -I ~{outputPrefix}.~{umiLength}.bam \
-        --group-out=~{outputPrefix}.~{umiLength}.umi_groups.tsv \
-        --output-bam > ~{outputPrefix}.~{umiLength}.dedup.bam \
-        --log=group.log --paired | samtools view
+        umi_tools dedup -I ~{outputPrefix}.~{umiLength}.bam \
+        -S deduplicated.bam
     >>>
 
     runtime {
@@ -306,60 +296,16 @@ task bamSplitDeduplication {
     }
 
     output {
-        File umiDedupBams = "output.~{umiLength}.dedup.bam"
-        File umiMetrics = "output.~{umiLength}.umi_groups.tsv"
+        File umiDedupBams = "deduplicated.bam"
     }
 
     meta {
         output_meta: {
             umiDedupBams: "Bam files with deduplicated UMIs of varying lengths",
-            umiMetrics: "File mapping read id to read group"
         }
     }
 }
 
-task mergeUMIs {
-    input {
-        Array[File] umiMetrics
-        Int memory = 16
-    }
-
-    parameter_meta {
-        umiMetrics: "An array of TSV files with UMI metrics"
-        memory: "Memory allocated for this job"
-    }
-
-    command <<<
-        
-        umiMetrics=(~{sep=" " umiMetrics})
-        length=${#umiMetrics[@]}
-
-        i=0
-
-        awk 'NR==1' ${umiMetrics[i]} > starter.tsv
-        while [ $i -le $length ]
-        do
-            sort -k9 -n ${umiMetrics[i]} > tmp.tsv
-            gawk -i inplace '(NR>1) { match($7, "([ACTG.])+") ;  $9=RLENGTH-1"."$9 ; print}' tmp.tsv
-    
-            tail -n +2 tmp.tsv >> starter.tsv
-            i=$(( $i+1 ))
-        done
-        sed -e 's/\s\+/\t/g' starter.tsv > mergedUMIMetrics.tsv 
-    >>>
-    runtime {
-        memory: "~{memory}G"
-    }
-    output {
-        File mergedUMIMetrics = "mergedUMIMetrics.tsv"
-    }
-
-    meta {
-        output_meta: {
-            mergedUMIMetrics: "A TSV of UMI metrics for all UMIs"
-        }
-    }
-}
 task bamMerge {
     input {
         Array[File] umiDedupBams
