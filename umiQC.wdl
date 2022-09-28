@@ -301,7 +301,7 @@ task bamSplitDeduplication {
 
     meta {
         output_meta: {
-            umiDedupBams: "Bam files with deduplicated UMIs of varying lengths",
+            umiDedupBams: "Bam files with deduplicated UMIs of varying lengths"
         }
     }
 }

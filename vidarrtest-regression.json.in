@@ -43,7 +43,6 @@
             "umiQC.extractUMIs.memory": null,
             "umiQC.extractUMIs.modules": "barcodex-rs/0.1.2 rust/1.45.1",
             "umiQC.extractUMIs.timeout": null,
-            "umiQC.mergeUMIs.memory": null,
             "umiQC.fastq1": {
                 "contents": {
                     "configuration": "/.mounts/labs/gsi/testdata/umiQC/inputs/r1.fastq",
@@ -267,21 +266,13 @@
                     }
                 ],
                 "type": "ALL"
-            },
-            "umiQC.mergedUMIMetrics": {
-                "contents": [
-                    {
-                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
-                    }
-                ],
-                "type": "ALL"
             }
         },
         "validators": [
             {
                 "metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
                 "metrics_compare": "@CHECKOUT@/tests/compare.sh",
-                "output_metrics": "/.mounts/labs/gsi/testdata/umiQC/output_metrics/1.0.2/umiQC_dataset1.metrics",
+                "output_metrics": "/.mounts/labs/gsi/testdata/umiQC/output_metrics/1.1.0/umiQC_dataset1.metrics",
                 "type": "script"
             }
         ]
