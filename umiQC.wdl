@@ -23,8 +23,8 @@ workflow umiQC {
     }
 
     meta {
-        author: "Michelle Feng and Murto Hilali"
-        email: "mfeng@oicr.on.ca and mhilali@oicr.on.ca"
+        author: "Michelle Feng, Murto Hilali and Gavin Peng"
+        email: "mfeng@oicr.on.ca, mhilali@oicr.on.ca and gpeng@oicr.on.ca"
         description: "QC workflow to assess UMI components"
         dependencies: [
             {
@@ -76,7 +76,8 @@ workflow umiQC {
             umiCounts: "JSON record of UMI counts after extraction",
             extractionMetrics: "JSON of metrics relating to extraction process",
             preDedupBamMetrics: "BamQC JSON report on bam file pre-deduplication",
-            postDedupBamMetrics: "BamQC JSON report on bam file post-deduplication"
+            postDedupBamMetrics: "BamQC JSON report on bam file post-deduplication",
+            umiCountsPerPosition: "tsv file tabulates the counts for unique combinations of UMI and position",
         }
     }
 
@@ -109,7 +110,7 @@ workflow umiQC {
     call bamQC.bamQC as preDedupBamQC {
         input:
             bamFile = bwaMem.bwaMemBam,
-            outputFileNamePrefix = "preDedup"
+            outputFileNamePrefix = "~{outputPrefix}.preDedup"
     }
 
     scatter (umiLength in umiLengths) {
@@ -131,13 +132,22 @@ workflow umiQC {
     call bamQC.bamQC as postDedupBamQC {
         input:
             bamFile = bamMerge.umiDedupBam,
-            outputFileNamePrefix = "postDedup"
+            outputFileNamePrefix = "~{outputPrefix}.postDedup"
+    }
+
+    call statsMerge {
+        input:
+            umiCountsPerPositions = bamSplitDeduplication.dedupUmiCountsPerPosition,
+            outputPrefix = outputPrefix
     }
 
     output {
         # barcodex metrics
         File umiCounts = extractUMIs.umiCounts
         File extractionMetrics = extractUMIs.extractionMetrics
+
+        # metrix from umi-tools dedup
+        File umiCountsPerPosition = statsMerge.umiCountsPerPosition
 
         # pre-collapse bamqc metrics
         File preDedupBamMetrics = preDedupBamQC.result
@@ -286,7 +296,8 @@ task bamSplitDeduplication {
         samtools index ~{outputPrefix}.~{umiLength}.bam
 
         umi_tools dedup -I ~{outputPrefix}.~{umiLength}.bam \
-        -S deduplicated.bam
+        -S deduplicated.bam \
+        --output-stats=deduplicated 
     >>>
 
     runtime {
@@ -297,11 +308,13 @@ task bamSplitDeduplication {
 
     output {
         File umiDedupBams = "deduplicated.bam"
+        File dedupUmiCountsPerPosition = "deduplicated_per_umi_per_position.tsv"
     }
 
     meta {
         output_meta: {
-            umiDedupBams: "Bam files with deduplicated UMIs of varying lengths"
+            umiDedupBams: "Bam files with deduplicated UMIs of varying lengths",
+            dedupUmiCountsPerPosition: "tsv file tabulates the counts for unique combinations of UMI and position"
         }
     }
 }
@@ -345,5 +358,43 @@ task bamMerge {
             umiDedupBam: "Deduplicated bam file"
         }
     }
+}
 
+task statsMerge {
+    input{
+        Array[File] umiCountsPerPositions
+        Int memory = 16
+        String outputPrefix
+    }
+
+    parameter_meta {
+        umiCountsPerPositions: "An array of TSV files with umiCountsPerPosition"
+        memory: "Memory allocated for this job"
+    }
+
+    command <<<
+        set -euo pipefail
+
+        umiCountsPerPositions=(~{sep=" " umiCountsPerPositions})
+        length=${#umiCountsPerPositions[@]}
+        touch umi.tsv
+        i=0
+        while [ $i -lt $length ]
+        do
+            cat umi.tsv > tmp.tsv
+            awk  '{s2[$1]+=$2; s3[$1]+=$3} \
+            END {for (k in s2) print k"\t"s2[k]"\t"s3[k]}' \
+            tmp.tsv <(tail -n +2 ${umiCountsPerPositions[i]}) > umi.tsv
+            i=$(( $i+1 ))
+        done
+        cat <(head -n 1 ${umiCountsPerPositions[0]}) umi.tsv > ~{outputPrefix}.umiCountsPerPosition.tsv
+    >>>
+
+    runtime {
+    memory: "~{memory}G"
+    }
+
+    output {
+        File umiCountsPerPosition = "~{outputPrefix}.umiCountsPerPosition.tsv"
+    }
 }
