@@ -2,6 +2,7 @@
     {    
         "arguments": {
             "umiQC.bamMerge.memory": null,
+            "umiQC.statsMerge.memory": null,
             "umiQC.bamMerge.modules": "samtools/1.9",
             "umiQC.bamMerge.timeout": null,
             "umiQC.bamSplitDeduplication.memory": null,
