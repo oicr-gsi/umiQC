@@ -77,7 +77,7 @@ workflow umiQC {
             extractionMetrics: "JSON of metrics relating to extraction process",
             preDedupBamMetrics: "BamQC JSON report on bam file pre-deduplication",
             postDedupBamMetrics: "BamQC JSON report on bam file post-deduplication",
-            umiCountsPerPosition: "tsv file tabulates the counts for unique combinations of UMI and position",
+            umiCountsPerPosition: "tsv file tabulates the counts for unique combinations of UMI and position"
         }
     }
 
