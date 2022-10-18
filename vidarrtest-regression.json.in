@@ -268,7 +268,7 @@
                 ],
                 "type": "ALL"
             },
-            "umiCountsPerPosition": {
+            "umiQC.umiCountsPerPosition": {
                 "contents": [
                     {
                         "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
