@@ -4,4 +4,5 @@ set -euo pipefail
 cd $1
 
 find . -name "*.json" -xtype f -exec sh -c "cat {} | md5sum |sort" \;
+find . -name "*.tsv" -xtype f -exec sh -c "cat {} | md5sum " \;
 ls | sed 's/.*\.//' | sort | uniq -c
