@@ -2,6 +2,7 @@
     {    
         "arguments": {
             "umiQC.bamMerge.memory": null,
+            "umiQC.reference": "hg38",
             "umiQC.statsMerge.memory": null,
             "umiQC.bamMerge.modules": "samtools/1.9",
             "umiQC.bamMerge.timeout": null,
@@ -28,9 +29,7 @@
             "umiQC.bwaMem.numChunk": null,
             "umiQC.bwaMem.readGroups": "'@RG\\tID:1\\tLB:neat_5x_EX_hg19_golden\\tPL:illumina\\tPU:run_barcode\\tSM:neat_5x_EX_hg19_golden'",
             "umiQC.bwaMem.runBwaMem_addParam": null,
-            "umiQC.bwaMem.runBwaMem_bwaRef": "$HG19_BWA_INDEX_ROOT/hg19_random.fa",
             "umiQC.bwaMem.runBwaMem_jobMemory": null,
-            "umiQC.bwaMem.runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg19-bwa-index/0.7.12",
             "umiQC.bwaMem.runBwaMem_threads": null,
             "umiQC.bwaMem.runBwaMem_timeout": null,
             "umiQC.bwaMem.slicerR1_jobMemory": null,
@@ -287,3 +286,4 @@
         ]
     }
 ]
+
