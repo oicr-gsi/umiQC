@@ -3,6 +3,11 @@ version 1.0
 import "imports/pull_bwaMem.wdl" as bwaMem
 import "imports/pull_bamQC.wdl" as bamQC
 
+struct GenomeResources {
+    String bwaRef
+    String runBwaMem_modules
+}
+
 workflow umiQC {
     input {
         String umiList
@@ -11,6 +16,22 @@ workflow umiQC {
         File fastq2
         String pattern1 
         String pattern2
+        String reference
+    }
+
+    Map[String,GenomeResources] resources = {
+    "hg19": {
+        "bwaRef": "$HG19_BWA_INDEX_ROOT/hg19_random.fa",
+        "runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg19-bwa-index/0.7.12"
+    },
+    "hg38": {
+        "bwaRef": "$HG38_BWA_INDEX_ROOT/hg38_random.fa",
+        "runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg38-bwa-index/0.7.12"
+    },
+    "mm10":{
+        "bwaRef": "$MM10_BWA_INDEX_ROOT/mm10.fa",
+        "runBwaMem_modules": "samtools/1.9 bwa/0.7.12 mm10-bwa-index/0.7.12"
+    }
     }
 
     parameter_meta {
@@ -20,6 +41,7 @@ workflow umiQC {
         fastq2: "Fastq file for read 2"
         pattern1: "UMI pattern 1"
         pattern2: "UMI pattern 2"
+        reference : "the reference genome for input sample"
     }
 
     meta {
@@ -104,7 +126,9 @@ workflow umiQC {
         input:
             fastqR1 = extractUMIs.fastqR1,
             fastqR2 = extractUMIs.fastqR2,
-            outputFileNamePrefix = outputPrefix
+            outputFileNamePrefix = outputPrefix,
+            runBwaMem_bwaRef = resources [ reference ].bwaRef,
+            runBwaMem_modules = resources [ reference ].runBwaMem_modules
     }
 
     call bamQC.bamQC as preDedupBamQC {

@@ -36,8 +36,7 @@ Parameter|Value|Description
 `fastq2`|File|Fastq file for read 2
 `pattern1`|String|UMI pattern 1
 `pattern2`|String|UMI pattern 2
-`bwaMem.runBwaMem_bwaRef`|String|The reference genome to align the sample with by BWA
-`bwaMem.runBwaMem_modules`|String|Required environment modules
+`reference`|String|the reference genome for input sample
 `bwaMem.readGroups`|String|Complete read group header line
 `preDedupBamQC.bamQCMetrics_workflowVersion`|String|Workflow version string
 `preDedupBamQC.bamQCMetrics_refSizesBed`|String|Path to human genome BED reference with chromosome sizes
@@ -233,7 +232,7 @@ Parameter|Value|Default|Description
 `postDedupBamQC.filter_jobMemory`|Int|16|Memory allocated for this job
 `postDedupBamQC.filter_modules`|String|"samtools/1.9"|required environment modules
 `postDedupBamQC.filter_minQuality`|Int|30|Minimum alignment quality to pass filter
-
+`statsMerge.memory`|Int|16|Memory allocated for this job
 
 ### Outputs
 
@@ -319,7 +318,7 @@ Output | Type | Description
              cat ${umiMetrics[i]} >> mergedUMIMetrics.tsv
              i=$(( $i+1 ))
          done
-         tr -s '[ , 	]' '\t' < mergedUMIMetrics.tsv > tmp.tsv && mv tmp.tsv mergedUMIMetrics.tsv 
+         tr -s '[ ,     ]' '\t' < mergedUMIMetrics.tsv > tmp.tsv && mv tmp.tsv mergedUMIMetrics.tsv 
  ```
  ### Merge deduplicated BAM files
  
@@ -330,5 +329,3 @@ Output | Type | Description
  ## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
-
-_Generated with generate-markdown-readme (https://github.com/oicr-gsi/gsi-wdl-tools/)_
