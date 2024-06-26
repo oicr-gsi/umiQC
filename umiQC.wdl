@@ -94,13 +94,28 @@ workflow umiQC {
                 url: "https://github.com/brentp/mosdepth"
             }
         ]
-        output_meta: {
-            umiCounts: "JSON record of UMI counts after extraction",
-            extractionMetrics: "JSON of metrics relating to extraction process",
-            preDedupBamMetrics: "BamQC JSON report on bam file pre-deduplication",
-            postDedupBamMetrics: "BamQC JSON report on bam file post-deduplication",
-            umiCountsPerPosition: "tsv file tabulates the counts for unique combinations of UMI and position"
-        }
+    output_meta: {
+    umiCounts: {
+        description: "JSON record of UMI counts after extraction",
+        vidarr_label: "umiCounts"
+    },
+    extractionMetrics: {
+        description: "JSON of metrics relating to extraction process",
+        vidarr_label: "extractionMetrics"
+    },
+    preDedupBamMetrics: {
+        description: "BamQC JSON report on bam file pre-deduplication",
+        vidarr_label: "preDedupBamMetrics"
+    },
+    postDedupBamMetrics: {
+        description: "BamQC JSON report on bam file post-deduplication",
+        vidarr_label: "postDedupBamMetrics"
+    },
+    umiCountsPerPosition: {
+        description: "tsv file tabulates the counts for unique combinations of UMI and position",
+        vidarr_label: "umiCountsPerPosition"
+    }
+}
     }
 
     call getUMILengths {
