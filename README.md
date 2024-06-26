@@ -234,27 +234,28 @@ Parameter|Value|Default|Description
 `postDedupBamQC.filter_minQuality`|Int|30|Minimum alignment quality to pass filter
 `statsMerge.memory`|Int|16|Memory allocated for this job
 
+
 ### Outputs
 
-Output | Type | Description
----|---|---
-`umiCounts`|File|JSON record of UMI counts after extraction
-`extractionMetrics`|File|JSON of metrics relating to extraction process
-`preDedupBamMetrics`|File|BamQC JSON report on bam file pre-deduplication
-`mergedUMIMetrics`|File|TSV of files mapping read id to read group
-`postDedupBamMetrics`|File|BamQC JSON report on bam file post-deduplication
+Output | Type | Description | Labels
+---|---|---|---
+`umiCounts`|File|JSON record of UMI counts after extraction|vidarr_label: umiCounts
+`extractionMetrics`|File|JSON of metrics relating to extraction process|vidarr_label: extractionMetrics
+`umiCountsPerPosition`|File|tsv file tabulates the counts for unique combinations of UMI and position|vidarr_label: umiCountsPerPosition
+`preDedupBamMetrics`|File|BamQC JSON report on bam file pre-deduplication|vidarr_label: preDedupBamMetrics
+`postDedupBamMetrics`|File|BamQC JSON report on bam file post-deduplication|vidarr_label: postDedupBamMetrics
 
 
 ## Commands
- This section lists command(s) run by umiQC workflow
+This section lists command(s) run by umiQC workflow
  
- * Running umiQC
+* Running umiQC
  
- QC workflow to assess UMI components.
+QC workflow to assess UMI components.
  
- ### Get lengths of paired-end UMIs from kit
+### Get lengths of paired-end UMIs from kit
  
- ```
+```
  
        k=($(awk '{ match($1, "([ACTG])+"); print RLENGTH }' ~{umiList} | uniq))
  
@@ -271,11 +272,11 @@ Output | Type | Description
        umiLengths=($(tr ' ' '\n' <<< "${L[@]}" | awk '!u[$0]++' | tr ' ' '\n'))
        printf "%s\n" "${umiLengths[@]}"
  
- ```
+```
  
- ### Extracting UMIs from FASTQ files and sorting UMI counts json
+### Extracting UMIs from FASTQ files and sorting UMI counts json
  
- ```
+```
              barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
              --pattern1 '~{pattern1}' --r1-in ~{fastq1} \
              --pattern2 '~{pattern2}' --r2-in ~{fastq2} 
@@ -285,11 +286,11 @@ Output | Type | Description
             tr [,] ',\n' < umiCounts.txt | sed 's/[{}]//' > tmp.txt
             echo "{$(sort -i tmp.txt)}" > new.txt
             tr '\n' ',' < new.txt | sed 's/,$//' > ~{outputPrefix}_UMI_counts.json
- ```
+```
  
- ### Splitting and deduplicating BAM files based on UMI lengths
+### Splitting and deduplicating BAM files based on UMI lengths
  
- ```
+```
          samtools view -H ~{bamFile} > ~{outputPrefix}.~{umiLength}.sam
          samtools view ~{bamFile} | grep -P "^.*__\S{~{umiLength}}\t" >> ~{outputPrefix}.~{umiLength}.sam
          samtools view -Sb ~{outputPrefix}.~{umiLength}.sam > ~{outputPrefix}.~{umiLength}.bam
@@ -300,11 +301,11 @@ Output | Type | Description
          --group-out=~{outputPrefix}.~{umiLength}.umi_groups.tsv \
          --output-bam > ~{outputPrefix}.~{umiLength}.dedup.bam \
          --log=group.log --paired | samtools view
- ```
+```
  
- ### Merge UMI metrics into one TSV file
+### Merge UMI metrics into one TSV file
  
- ```
+```
          umiMetrics=(~{sep=" " umiMetrics})
          length=${#umiMetrics[@]}
  
@@ -319,13 +320,13 @@ Output | Type | Description
              i=$(( $i+1 ))
          done
          tr -s '[ ,     ]' '\t' < mergedUMIMetrics.tsv > tmp.tsv && mv tmp.tsv mergedUMIMetrics.tsv 
- ```
- ### Merge deduplicated BAM files
+```
+### Merge deduplicated BAM files
  
- ```        
+```        
          set -euo pipefail
          samtools merge -c ~{outputPrefix}.dedup.bam ~{sep=" " umiDedupBams}
- ``` 
- ## Support
+``` 
+## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
