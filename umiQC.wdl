@@ -47,7 +47,7 @@ workflow umiQC {
     meta {
         author: "Michelle Feng, Murto Hilali and Gavin Peng"
         email: "mfeng@oicr.on.ca, mhilali@oicr.on.ca and gpeng@oicr.on.ca"
-        description: "QC workflow to assess UMI components"
+        description: "QC workflow to assess UMI components. The workflow runs BarcodEX, a tool for extracting Unique Molecular Identifiers (UMIs) from single or paired-end read sequences. bwaMem is used to generate alignments from UMI fastq files with the following deduplication and QC using imported bamQC workflow"
         dependencies: [
             {
                 name: "barcodex-rs/0.1.2",

@@ -1,6 +1,6 @@
 # umiQC
 
-QC workflow to assess UMI components
+QC workflow to assess UMI components. The workflow runs BarcodEX, a tool for extracting Unique Molecular Identifiers (UMIs) from single or paired-end read sequences. bwaMem is used to generate alignments from UMI fastq files with the following deduplication and QC using imported bamQC workflow
 
 ## Overview
 
