@@ -28,6 +28,10 @@ workflow umiQC {
         "bwaRef": "$HG38_BWA_INDEX_ROOT/hg38_random.fa",
         "runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg38-bwa-index/0.7.12"
     },
+    "hg38_noAlt": {
+        "bwaRef": "$HG38_BWA_INDEX_NOALT_ROOT/hg38_noAlt.fa",
+        "runBwaMem_modules": "samtools/1.9 bwa/0.7.17 hg38-bwa-index-noalt/0.7.17"
+    },
     "mm10":{
         "bwaRef": "$MM10_BWA_INDEX_ROOT/mm10.fa",
         "runBwaMem_modules": "samtools/1.9 bwa/0.7.12 mm10-bwa-index/0.7.12"
