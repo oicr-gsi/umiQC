@@ -1,12 +1,8 @@
 version 1.0
 
-import "imports/pull_bwaMem.wdl" as bwaMem
+import "imports/pull_bwamem2.wdl" as bwamem2
 import "imports/pull_bamQC.wdl" as bamQC
-
-struct GenomeResources {
-    String bwaRef
-    String runBwaMem_modules
-}
+import "imports/pull_hsMetrics.wdl" as hsMetrics
 
 workflow umiQC {
     input {
@@ -17,25 +13,8 @@ workflow umiQC {
         String pattern1 
         String pattern2
         String reference
-    }
-
-    Map[String,GenomeResources] resources = {
-    "hg19": {
-        "bwaRef": "$HG19_BWA_INDEX_ROOT/hg19_random.fa",
-        "runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg19-bwa-index/0.7.12"
-    },
-    "hg38": {
-        "bwaRef": "$HG38_BWA_INDEX_ROOT/hg38_random.fa",
-        "runBwaMem_modules": "samtools/1.9 bwa/0.7.12 hg38-bwa-index/0.7.12"
-    },
-    "hg38_noAlt": {
-        "bwaRef": "$HG38_BWA_INDEX_NOALT_ROOT/hg38_noAlt.fa",
-        "runBwaMem_modules": "samtools/1.9 bwa/0.7.17 hg38-bwa-index-noalt/0.7.17"
-    },
-    "mm10":{
-        "bwaRef": "$MM10_BWA_INDEX_ROOT/mm10.fa",
-        "runBwaMem_modules": "samtools/1.9 bwa/0.7.12 mm10-bwa-index/0.7.12"
-    }
+        String baitBed
+        String targetBed
     }
 
     parameter_meta {
@@ -46,11 +25,13 @@ workflow umiQC {
         pattern1: "UMI pattern 1"
         pattern2: "UMI pattern 2"
         reference : "the reference genome for input sample"
+        baitBed: "Path to input bait bed file"
+        targetBed: "Path to input target bed file"
     }
 
     meta {
-        author: "Michelle Feng, Murto Hilali and Gavin Peng"
-        email: "mfeng@oicr.on.ca, mhilali@oicr.on.ca and gpeng@oicr.on.ca"
+        author: "Michelle Feng, Murto Hilali, Gavin Peng and Aditi Nagaraj Nallan"
+        email: "mfeng@oicr.on.ca, mhilali@oicr.on.ca, gpeng@oicr.on.ca and anallan@oicr.on.ca"
         description: "QC workflow to assess UMI components. The workflow runs BarcodEX, a tool for extracting Unique Molecular Identifiers (UMIs) from single or paired-end read sequences. bwaMem is used to generate alignments from UMI fastq files with the following deduplication and QC using imported bamQC workflow"
         dependencies: [
             {
@@ -66,8 +47,8 @@ workflow umiQC {
                 url: "https://github.com/CGATOxford/UMI-tools/archive/1.1.1.tar.gz"
             },
             {
-                name: "bwa/0.7.12",
-                url: "https://github.com/lh3/bwa/archive/0.7.12.tar.gz"
+                name: "bwa-mem2/2.2.1",
+                url: "https://github.com/oicr-gsi/bwamem2/tree/master"
             },
             {
                 name: "samtools/1.9",
@@ -118,8 +99,16 @@ workflow umiQC {
     umiCountsPerPosition: {
         description: "tsv file tabulates the counts for unique combinations of UMI and position",
         vidarr_label: "umiCountsPerPosition"
+    },
+    preDedupHSMetricsFile: {
+        description: "Picard HSMetrics report on bam file pre-deduplication",
+        vidarr_label: "preDedupHSMetrics"
+    },
+    postDedupHSMetricsFile: {
+        description: "Picard HSMetrics report on bam file post-deduplication",
+        vidarr_label: "postDedupHSMetrics"
     }
-}
+    }
     }
 
     call getUMILengths {
@@ -141,30 +130,37 @@ workflow umiQC {
     }
 
 
-    call bwaMem.bwaMem {
+    call bwamem2.bwamem2 {
         input:
             fastqR1 = extractUMIs.fastqR1,
             fastqR2 = extractUMIs.fastqR2,
             outputFileNamePrefix = outputPrefix,
-            runBwaMem_bwaRef = resources [ reference ].bwaRef,
-            runBwaMem_modules = resources [ reference ].runBwaMem_modules
+            reference = reference
     }
 
     call bamQC.bamQC as preDedupBamQC {
         input:
-            bamFile = bwaMem.bwaMemBam,
+            bamFile = bwamem2.bwamem2Bam,
             outputFileNamePrefix = "~{outputPrefix}.preDedup"
+    }
+
+    call hsMetrics.hsMetrics as preDedupHSMetrics {
+        input:
+            inputBam = bwamem2.bwamem2Bam,
+            baitBed = baitBed,
+            targetBed = targetBed,
+            outputFileNamePrefix = "~{outputPrefix}.preDedup",
+            reference = reference
     }
 
     scatter (umiLength in umiLengths) {
         call bamSplitDeduplication {
             input:
-                bamFile = bwaMem.bwaMemBam,
+                bamFile = bwamem2.bwamem2Bam,
                 umiLength = umiLength,
                 outputPrefix = outputPrefix
         }
     }
-
 
     call bamMerge {
         input:
@@ -176,6 +172,15 @@ workflow umiQC {
         input:
             bamFile = bamMerge.umiDedupBam,
             outputFileNamePrefix = "~{outputPrefix}.postDedup"
+    }
+
+    call hsMetrics.hsMetrics as postDedupHSMetrics {
+        input:
+            inputBam = bamMerge.umiDedupBam,
+            baitBed = baitBed,
+            targetBed = targetBed,
+            outputFileNamePrefix = "~{outputPrefix}.postDedup",
+            reference = reference
     }
 
     call statsMerge {
@@ -197,6 +202,13 @@ workflow umiQC {
 
         # post-collapse bamqc metrics
         File postDedupBamMetrics = postDedupBamQC.result
+
+        # pre-collapse HS metrics
+        File preDedupHSMetricsFile = preDedupHSMetrics.outputHSMetrics
+
+        # post-collapse HS metrics
+        File postDedupHSMetricsFile = postDedupHSMetrics.outputHSMetrics
+    
     } 
 }
 
