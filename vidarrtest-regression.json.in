@@ -9,40 +9,42 @@
             "umiQC.bamSplitDeduplication.memory": null,
             "umiQC.bamSplitDeduplication.modules": "umi-tools/1.0.0 samtools/1.9",
             "umiQC.bamSplitDeduplication.timeout": null,
-            "umiQC.bwaMem.adapter1": null,
-            "umiQC.bwaMem.adapter2": null,
-            "umiQC.bwaMem.adapterTrimmingLog_jobMemory": null,
-            "umiQC.bwaMem.adapterTrimmingLog_timeout": null,
-            "umiQC.bwaMem.adapterTrimming_addParam": null,
-            "umiQC.bwaMem.adapterTrimming_jobMemory": null,
-            "umiQC.bwaMem.adapterTrimming_modules": "cutadapt/1.8.3",
-            "umiQC.bwaMem.adapterTrimming_timeout": null,
-            "umiQC.bwaMem.bamMerge_jobMemory": null,
-            "umiQC.bwaMem.bamMerge_modules": "samtools/1.9",
-            "umiQC.bwaMem.bamMerge_timeout": null,
-            "umiQC.bwaMem.countChunkSize_jobMemory": null,
-            "umiQC.bwaMem.countChunkSize_timeout": null,
-            "umiQC.bwaMem.doTrim": null,
-            "umiQC.bwaMem.indexBam_jobMemory": null,
-            "umiQC.bwaMem.indexBam_modules": "samtools/1.9",
-            "umiQC.bwaMem.indexBam_timeout": null,
-            "umiQC.bwaMem.numChunk": null,
-            "umiQC.bwaMem.readGroups": "'@RG\\tID:1\\tLB:neat_5x_EX_hg19_golden\\tPL:illumina\\tPU:run_barcode\\tSM:neat_5x_EX_hg19_golden'",
-            "umiQC.bwaMem.runBwaMem_addParam": null,
-            "umiQC.bwaMem.runBwaMem_jobMemory": null,
-            "umiQC.bwaMem.runBwaMem_threads": null,
-            "umiQC.bwaMem.runBwaMem_timeout": null,
-            "umiQC.bwaMem.slicerR1_jobMemory": null,
-            "umiQC.bwaMem.slicerR1_modules": null,
-            "umiQC.bwaMem.slicerR1_timeout": null,
-            "umiQC.bwaMem.slicerR2_jobMemory": null,
-            "umiQC.bwaMem.slicerR2_modules": null,
-            "umiQC.bwaMem.slicerR2_timeout": null,
-            "umiQC.bwaMem.trimMinLength": null,
-            "umiQC.bwaMem.trimMinQuality": null,
+            "umiQC.bwamem2.adapter1": null,
+            "umiQC.bwamem2.adapter2": null,
+            "umiQC.bwamem2.adapterTrimmingLog_jobMemory": null,
+            "umiQC.bwamem2.adapterTrimmingLog_timeout": null,
+            "umiQC.bwamem2.adapterTrimming_addParam": null,
+            "umiQC.bwamem2.adapterTrimming_jobMemory": null,
+            "umiQC.bwamem2.adapterTrimming_modules": "cutadapt/1.8.3",
+            "umiQC.bwamem2.adapterTrimming_timeout": null,
+            "umiQC.bwamem2.bamMerge_jobMemory": null,
+            "umiQC.bwamem2.bamMerge_modules": "samtools/1.9",
+            "umiQC.bwamem2.bamMerge_timeout": null,
+            "umiQC.bwamem2.countChunkSize_jobMemory": null,
+            "umiQC.bwamem2.countChunkSize_timeout": null,
+            "umiQC.bwamem2.doTrim": null,
+            "umiQC.bwamem2.indexBam_jobMemory": null,
+            "umiQC.bwamem2.indexBam_modules": "samtools/1.9",
+            "umiQC.bwamem2.indexBam_timeout": null,
+            "umiQC.bwamem2.numChunk": null,
+            "umiQC.bwamem2.readGroups": "'@RG\\tID:1\\tLB:neat_5x_EX_hg19_golden\\tPL:illumina\\tPU:run_barcode\\tSM:neat_5x_EX_hg19_golden'",
+            "umiQC.bwamem2.runBwamem2_addParam": null,
+            "umiQC.bwamem2.runBwamem2_jobMemory": null,
+            "umiQC.bwamem2.runBwamem2_threads": null,
+            "umiQC.bwamem2.runBwamem2_timeout": null,
+            "umiQC.bwamem2.slicerR1_jobMemory": null,
+            "umiQC.bwamem2.slicerR1_modules": null,
+            "umiQC.bwamem2.slicerR1_timeout": null,
+            "umiQC.bwamem2.slicerR2_jobMemory": null,
+            "umiQC.bwamem2.slicerR2_modules": null,
+            "umiQC.bwamem2.slicerR2_timeout": null,
+            "umiQC.bwamem2.trimMinLength": null,
+            "umiQC.bwamem2.trimMinQuality": null,
             "umiQC.extractUMIs.memory": null,
             "umiQC.extractUMIs.modules": "barcodex-rs/0.1.2 rust/1.45.1",
             "umiQC.extractUMIs.timeout": null,
+            "umiQC.baitBed": "/.mounts/labs/gsi/testdata/umiQC/test_inputs/REVOLVE_Panel_V2.TS.hg38.bed",
+            "umiQC.targetBed": "/.mounts/labs/gsi/testdata/umiQC/test_inputs/REVOLVE_Panel_V2.TS.hg38.bed",
             "umiQC.fastq1": {
                 "contents": {
                     "configuration": "/.mounts/labs/gsi/testdata/umiQC/inputs/r1.fastq",
@@ -148,6 +150,16 @@
             "umiQC.postDedupBamQC.updateMetadata_modules": null,
             "umiQC.postDedupBamQC.updateMetadata_threads": null,
             "umiQC.postDedupBamQC.updateMetadata_timeout": null,
+            "umiQC.postDedupHS.bedToTargetIntervals_jobMemory": null,
+            "umiQC.postDedupHS.bedToTargetIntervals_timeout": null,
+            "umiQC.postDedupHS.bedToBaitIntervals_jobMemory": null,
+            "umiQC.postDedupHS.bedToBaitIntervals_timeout": null,
+            "umiQC.postDedupHS.collectHSmetrics_jobMemory": null,
+            "umiQC.postDedupHS.collectHSmetrics_timeout": null,
+            "umiQC.postDedupHS.collectHSmetrics_coverageCap": null,
+            "umiQC.postDedupHS.collectHSmetrics_maxRecordsInRam": null,
+            "umiQC.postDedupHS.collectHSmetrics_metricTag": null,
+            "umiQC.postDedupHS.collectHSmetrics_filter": null,
             "umiQC.preDedupBamQC.bamQCMetrics_jobMemory": null,
             "umiQC.preDedupBamQC.bamQCMetrics_modules": null,
             "umiQC.preDedupBamQC.bamQCMetrics_normalInsertMax": null,
@@ -226,6 +238,16 @@
             "umiQC.preDedupBamQC.updateMetadata_modules": null,
             "umiQC.preDedupBamQC.updateMetadata_threads": null,
             "umiQC.preDedupBamQC.updateMetadata_timeout": null,
+            "umiQC.preDedupHS.bedToTargetIntervals_jobMemory": null,
+            "umiQC.preDedupHS.bedToTargetIntervals_timeout": null,
+            "umiQC.preDedupHS.bedToBaitIntervals_jobMemory": null,
+            "umiQC.preDedupHS.bedToBaitIntervals_timeout": null,
+            "umiQC.preDedupHS.collectHSmetrics_jobMemory": null,
+            "umiQC.preDedupHS.collectHSmetrics_timeout": null,
+            "umiQC.preDedupHS.collectHSmetrics_coverageCap": null,
+            "umiQC.preDedupHS.collectHSmetrics_maxRecordsInRam": null,
+            "umiQC.preDedupHS.collectHSmetrics_metricTag": null,
+            "umiQC.preDedupHS.collectHSmetrics_filter": null,
             "umiQC.umiList": "/.mounts/labs/gsi/testdata/umiQC/inputs/IDT_true_barcodes.txt"
         },
         "description": "UmiQC workflow test",
@@ -274,13 +296,29 @@
                     }
                 ],
                 "type": "ALL"
+            },
+            "umiQC.preDedupHSMetricsFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
+            },
+            "umiQC.postDedupHSMetricsFile": {
+                "contents": [
+                    {
+                        "outputDirectory": "@SCRATCH@/@DATE@_Workflow_umiQCWorkflow_umiQC_dataset1_@JENKINSID@"
+                    }
+                ],
+                "type": "ALL"
             }
         },
         "validators": [
             {
                 "metrics_calculate": "@CHECKOUT@/tests/calculate.sh",
                 "metrics_compare": "@CHECKOUT@/tests/compare.sh",
-                "output_metrics": "/.mounts/labs/gsi/testdata/umiQC/output_metrics/1.1.1/umiQC_dataset1.metrics",
+                "output_metrics": "/.mounts/labs/gsi/testdata/umiQC/output_metrics/1.3.0/umiQC_dataset1.metrics",
                 "type": "script"
             }
         ]

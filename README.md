@@ -9,7 +9,7 @@ QC workflow to assess UMI components. The workflow runs BarcodEX, a tool for ext
 * [barcodex-rs 0.1.2](https://github.com/oicr-gsi/barcodex-rs/archive/v0.1.2.tar.gz)
 * [rust 1.2](https://www.rust-lang.org/tools/install)
 * [umi-tools 1.1.1](https://github.com/CGATOxford/UMI-tools/archive/1.1.1.tar.gz)
-* [bwa 0.7.12](https://github.com/lh3/bwa/archive/0.7.12.tar.gz)
+* [bwa-mem2 2.2.1](https://github.com/oicr-gsi/bwamem2/tree/master)
 * [samtools 1.9](https://github.com/samtools/samtools/archive/0.1.19.tar.gz)
 * [cutadapt 1.8.3](https://cutadapt.readthedocs.io/en/v1.8.3/)
 * [slicer 0.3.0](https://github.com/OpenGene/slicer/archive/v0.3.0.tar.gz)
@@ -37,7 +37,9 @@ Parameter|Value|Description
 `pattern1`|String|UMI pattern 1
 `pattern2`|String|UMI pattern 2
 `reference`|String|the reference genome for input sample
-`bwaMem.readGroups`|String|Complete read group header line
+`baitBed`|String|Path to input bait bed file
+`targetBed`|String|Path to input target bed file
+`bwamem2.runBwamem2_readGroups`|String|The readgroup information to be injected into the bam header
 `preDedupBamQC.bamQCMetrics_workflowVersion`|String|Workflow version string
 `preDedupBamQC.bamQCMetrics_refSizesBed`|String|Path to human genome BED reference with chromosome sizes
 `preDedupBamQC.bamQCMetrics_refFasta`|String|Path to human genome FASTA reference
@@ -60,36 +62,48 @@ Parameter|Value|Default|Description
 `extractUMIs.modules`|String|"barcodex-rs/0.1.2 rust/1.45.1"|Required environment modules
 `extractUMIs.memory`|Int|24|Memory allocated for this job
 `extractUMIs.timeout`|Int|12|Time in hours before task timeout
-`bwaMem.adapterTrimmingLog_timeout`|Int|48|Hours before task timeout
-`bwaMem.adapterTrimmingLog_jobMemory`|Int|12|Memory allocated indexing job
-`bwaMem.indexBam_timeout`|Int|48|Hours before task timeout
-`bwaMem.indexBam_modules`|String|"samtools/1.9"|Modules for running indexing job
-`bwaMem.indexBam_jobMemory`|Int|12|Memory allocated indexing job
-`bwaMem.bamMerge_timeout`|Int|72|Hours before task timeout
-`bwaMem.bamMerge_modules`|String|"samtools/1.9"|Required environment modules
-`bwaMem.bamMerge_jobMemory`|Int|32|Memory allocated indexing job
-`bwaMem.runBwaMem_timeout`|Int|96|Hours before task timeout
-`bwaMem.runBwaMem_jobMemory`|Int|32|Memory allocated for this job
-`bwaMem.runBwaMem_threads`|Int|8|Requested CPU threads
-`bwaMem.runBwaMem_addParam`|String?|None|Additional BWA parameters
-`bwaMem.adapterTrimming_timeout`|Int|48|Hours before task timeout
-`bwaMem.adapterTrimming_jobMemory`|Int|16|Memory allocated for this job
-`bwaMem.adapterTrimming_addParam`|String?|None|Additional cutadapt parameters
-`bwaMem.adapterTrimming_modules`|String|"cutadapt/1.8.3"|Required environment modules
-`bwaMem.slicerR2_timeout`|Int|48|Hours before task timeout
-`bwaMem.slicerR2_jobMemory`|Int|16|Memory allocated for this job
-`bwaMem.slicerR2_modules`|String|"slicer/0.3.0"|Required environment modules
-`bwaMem.slicerR1_timeout`|Int|48|Hours before task timeout
-`bwaMem.slicerR1_jobMemory`|Int|16|Memory allocated for this job
-`bwaMem.slicerR1_modules`|String|"slicer/0.3.0"|Required environment modules
-`bwaMem.countChunkSize_timeout`|Int|48|Hours before task timeout
-`bwaMem.countChunkSize_jobMemory`|Int|16|Memory allocated for this job
-`bwaMem.numChunk`|Int|1|number of chunks to split fastq file [1, no splitting]
-`bwaMem.doTrim`|Boolean|false|if true, adapters will be trimmed before alignment
-`bwaMem.trimMinLength`|Int|1|minimum length of reads to keep [1]
-`bwaMem.trimMinQuality`|Int|0|minimum quality of read ends to keep [0]
-`bwaMem.adapter1`|String|"AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"|adapter sequence to trim from read 1 [AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC]
-`bwaMem.adapter2`|String|"AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"|adapter sequence to trim from read 2 [AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT]
+`bwamem2.adapterTrimmingLog_timeout`|Int|48|Hours before task timeout
+`bwamem2.adapterTrimmingLog_jobMemory`|Int|12|Memory allocated indexing job
+`bwamem2.indexBam_timeout`|Int|48|Hours before task timeout
+`bwamem2.indexBam_modules`|String|"samtools/1.9"|Modules for running indexing job
+`bwamem2.indexBam_jobMemory`|Int|12|Memory allocated indexing job
+`bwamem2.bamMerge_timeout`|Int|72|Hours before task timeout
+`bwamem2.bamMerge_modules`|String|"samtools/1.9"|Required environment modules
+`bwamem2.bamMerge_jobMemory`|Int|32|Memory allocated indexing job
+`bwamem2.runBwamem2_timeout`|Int|96|Hours before task timeout
+`bwamem2.runBwamem2_jobMemory`|Int|32|Memory allocated for this job
+`bwamem2.runBwamem2_threads`|Int|8|Requested CPU threads
+`bwamem2.runBwamem2_addParam`|String?|None|Additional BWA parameters
+`bwamem2.adapterTrimming_timeout`|Int|48|Hours before task timeout
+`bwamem2.adapterTrimming_jobMemory`|Int|16|Memory allocated for this job
+`bwamem2.adapterTrimming_addParam`|String?|None|Additional cutadapt parameters
+`bwamem2.adapterTrimming_adapter2`|String|"AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"|Adapter sequence to trim from read 2
+`bwamem2.adapterTrimming_adapter1`|String|"AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"|Adapter sequence to trim from read 1
+`bwamem2.adapterTrimming_trimMinQuality`|Int|0|Minimum quality of read ends to keep
+`bwamem2.adapterTrimming_trimMinLength`|Int|1|Minimum length of reads to keep
+`bwamem2.adapterTrimming_umiLength`|Int|5|The number of bases to trim when doUMItrim is true. If the given length is positive, the bases are removed from the beginning of each read. If it is negative, the bases are removed from the end
+`bwamem2.adapterTrimming_doUMItrim`|Boolean|false|If true, do umi trimming
+`bwamem2.adapterTrimming_modules`|String|"cutadapt/1.8.3"|Required environment modules
+`bwamem2.extractUMIs_timeout`|Int|12|Time in hours before task timeout
+`bwamem2.extractUMIs_jobMemory`|Int|24|Memory allocated for this job
+`bwamem2.extractUMIs_modules`|String|"barcodex-rs/0.1.2 rust/1.45.1"|Required environment modules
+`bwamem2.extractUMIs_pattern2`|String|"(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)"|UMI RegEx pattern 2
+`bwamem2.extractUMIs_pattern1`|String|"(?P<umi_1>^[ACGT]{3}[ACG])(?P<discard_1>T)|(?P<umi_2>^[ACGT]{3})(?P<discard_2>T)"|UMI RegEx pattern 1
+`bwamem2.extractUMIs_outputPrefix`|String|"extractUMIs_output"|Specifies the start of the output files
+`bwamem2.extractUMIs_umiList`|String|"umiList"|Reference file with valid UMIs
+`bwamem2.slicerR2_timeout`|Int|48|Hours before task timeout
+`bwamem2.slicerR2_jobMemory`|Int|16|Memory allocated for this job
+`bwamem2.slicerR2_modules`|String|"slicer/0.3.0"|Required environment modules
+`bwamem2.slicerR1_timeout`|Int|48|Hours before task timeout
+`bwamem2.slicerR1_jobMemory`|Int|16|Memory allocated for this job
+`bwamem2.slicerR1_modules`|String|"slicer/0.3.0"|Required environment modules
+`bwamem2.countChunkSize_timeout`|Int|48|Hours before task timeout
+`bwamem2.countChunkSize_jobMemory`|Int|16|Memory allocated for this job
+`bwamem2.countChunkSize_modules`|String|"python/3.7"|Required environment modules
+`bwamem2.numChunk`|Int|1|Number of chunks to split fastq file [1, no splitting]
+`bwamem2.doUMIextract`|Boolean|false|If true, UMI will be extracted before alignment [false]
+`bwamem2.doTrim`|Boolean|false|If true, adapters will be trimmed before alignment [false]
+`bwamem2.numReads`|Int?|None|Number of reads
 `preDedupBamQC.collateResults_timeout`|Int|1|hours before task timeout
 `preDedupBamQC.collateResults_threads`|Int|4|Requested CPU threads
 `preDedupBamQC.collateResults_jobMemory`|Int|8|Memory allocated for this job
@@ -158,6 +172,16 @@ Parameter|Value|Default|Description
 `preDedupBamQC.filter_jobMemory`|Int|16|Memory allocated for this job
 `preDedupBamQC.filter_modules`|String|"samtools/1.9"|required environment modules
 `preDedupBamQC.filter_minQuality`|Int|30|Minimum alignment quality to pass filter
+`preDedupHSMetrics.collectHSmetrics_timeout`|Int|5|Maximum amount of time (in hours) the task can run for.
+`preDedupHSMetrics.collectHSmetrics_maxRecordsInRam`|Int|250000|Specifies the N of records stored in RAM before spilling to disk. Increasing this number increases the amount of RAM needed.
+`preDedupHSMetrics.collectHSmetrics_coverageCap`|Int|500|Parameter to set a max coverage limit for Theoretical Sensitivity calculations
+`preDedupHSMetrics.collectHSmetrics_jobMemory`|Int|18|Memory allocated to job
+`preDedupHSMetrics.collectHSmetrics_filter`|String|"LENIENT"|Settings for picard filter
+`preDedupHSMetrics.collectHSmetrics_metricTag`|String|"HS"|Extension for metrics file
+`preDedupHSMetrics.bedToBaitIntervals_timeout`|Int|1|Maximum amount of time (in hours) the task can run for.
+`preDedupHSMetrics.bedToBaitIntervals_jobMemory`|Int|16|Memory allocated to job
+`preDedupHSMetrics.bedToTargetIntervals_timeout`|Int|1|Maximum amount of time (in hours) the task can run for.
+`preDedupHSMetrics.bedToTargetIntervals_jobMemory`|Int|16|Memory allocated to job
 `bamSplitDeduplication.modules`|String|"umi-tools/1.0.0 samtools/1.9"|Required environment modules
 `bamSplitDeduplication.memory`|Int|24|Memory allocated for this job
 `bamSplitDeduplication.timeout`|Int|6|Time in hours before task timeout
@@ -232,6 +256,16 @@ Parameter|Value|Default|Description
 `postDedupBamQC.filter_jobMemory`|Int|16|Memory allocated for this job
 `postDedupBamQC.filter_modules`|String|"samtools/1.9"|required environment modules
 `postDedupBamQC.filter_minQuality`|Int|30|Minimum alignment quality to pass filter
+`postDedupHSMetrics.collectHSmetrics_timeout`|Int|5|Maximum amount of time (in hours) the task can run for.
+`postDedupHSMetrics.collectHSmetrics_maxRecordsInRam`|Int|250000|Specifies the N of records stored in RAM before spilling to disk. Increasing this number increases the amount of RAM needed.
+`postDedupHSMetrics.collectHSmetrics_coverageCap`|Int|500|Parameter to set a max coverage limit for Theoretical Sensitivity calculations
+`postDedupHSMetrics.collectHSmetrics_jobMemory`|Int|18|Memory allocated to job
+`postDedupHSMetrics.collectHSmetrics_filter`|String|"LENIENT"|Settings for picard filter
+`postDedupHSMetrics.collectHSmetrics_metricTag`|String|"HS"|Extension for metrics file
+`postDedupHSMetrics.bedToBaitIntervals_timeout`|Int|1|Maximum amount of time (in hours) the task can run for.
+`postDedupHSMetrics.bedToBaitIntervals_jobMemory`|Int|16|Memory allocated to job
+`postDedupHSMetrics.bedToTargetIntervals_timeout`|Int|1|Maximum amount of time (in hours) the task can run for.
+`postDedupHSMetrics.bedToTargetIntervals_jobMemory`|Int|16|Memory allocated to job
 `statsMerge.memory`|Int|16|Memory allocated for this job
 
 
@@ -244,89 +278,88 @@ Output | Type | Description | Labels
 `umiCountsPerPosition`|File|tsv file tabulates the counts for unique combinations of UMI and position|vidarr_label: umiCountsPerPosition
 `preDedupBamMetrics`|File|BamQC JSON report on bam file pre-deduplication|vidarr_label: preDedupBamMetrics
 `postDedupBamMetrics`|File|BamQC JSON report on bam file post-deduplication|vidarr_label: postDedupBamMetrics
-
+`preDedupHSMetricsFile`|File|Picard HSMetrics report on bam file pre-deduplication|vidarr_label: preDedupHSMetrics
+`postDedupHSMetricsFile`|File|Picard HSMetrics report on bam file post-deduplication|vidarr_label: postDedupHSMetrics
 
 ## Commands
-This section lists command(s) run by umiQC workflow
+ This section lists command(s) run by umiQC workflow
  
-* Running umiQC
+ * Running umiQC
  
-QC workflow to assess UMI components.
+ QC workflow to assess UMI components.
  
-### Get lengths of paired-end UMIs from kit
+ ### Get lengths of paired-end UMIs from kit
  
-```
- 
+ ```
        k=($(awk '{ match($1, "([ACTG])+"); print RLENGTH }' ~{umiList} | uniq))
  
-       for i in ${k[@]}
-       do
-           for j in ${k[@]}
-           do
-               # adding 1 to account for period in UMI
-               # 'ATG.ATCG'
-               L+=($(($i+$j+1)))
-           done
-       done
+     for i in ${k[@]}
+     do
+         for j in ${k[@]}
+         do
+             L+=($(($i+$j+1)))
+         done
+     done
  
-       umiLengths=($(tr ' ' '\n' <<< "${L[@]}" | awk '!u[$0]++' | tr ' ' '\n'))
-       printf "%s\n" "${umiLengths[@]}"
+     umiLengths=($(tr ' ' '\n' <<< "${L[@]}" | awk '!u[$0]++' | tr ' ' '\n'))
+     printf "%s\n" "${umiLengths[@]}"
+ ```
  
-```
+ ### Extracting UMIs from FASTQ files
  
-### Extracting UMIs from FASTQ files and sorting UMI counts json
- 
-```
-             barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
+ ```
+         barcodex-rs --umilist ~{umiList} --prefix ~{outputPrefix} --separator "__" inline \
              --pattern1 '~{pattern1}' --r1-in ~{fastq1} \
              --pattern2 '~{pattern2}' --r2-in ~{fastq2} 
-
+ 
              cat ~{outputPrefix}_UMI_counts.json > umiCounts.txt
-
-            tr [,] ',\n' < umiCounts.txt | sed 's/[{}]//' > tmp.txt
-            echo "{$(sort -i tmp.txt)}" > new.txt
-            tr '\n' ',' < new.txt | sed 's/,$//' > ~{outputPrefix}_UMI_counts.json
-```
  
-### Splitting and deduplicating BAM files based on UMI lengths
+             tr [,] ',\n' < umiCounts.txt | sed 's/[{}]//' > tmp.txt
+             echo "{$(sort -i tmp.txt)}" > new.txt
+             tr '\n' ',' < new.txt | sed 's/,$//' > ~{outputPrefix}_UMI_counts.json
+ ```
  
-```
+ ### Splitting and deduplicating BAM files based on UMI lengths
+ 
+ ```
          samtools view -H ~{bamFile} > ~{outputPrefix}.~{umiLength}.sam
-         samtools view ~{bamFile} | grep -P "^.*__\S{~{umiLength}}\t" >> ~{outputPrefix}.~{umiLength}.sam
+         samtools view -F 2304 ~{bamFile} | grep -P "^.*__\S{~{umiLength}}\t" >> ~{outputPrefix}.~{umiLength}.sam
          samtools view -Sb ~{outputPrefix}.~{umiLength}.sam > ~{outputPrefix}.~{umiLength}.bam
  
          samtools index ~{outputPrefix}.~{umiLength}.bam
  
-         umi_tools group -I ~{outputPrefix}.~{umiLength}.bam \
-         --group-out=~{outputPrefix}.~{umiLength}.umi_groups.tsv \
-         --output-bam > ~{outputPrefix}.~{umiLength}.dedup.bam \
-         --log=group.log --paired | samtools view
-```
+         umi_tools dedup --paired -I ~{outputPrefix}.~{umiLength}.bam \
+         -S deduplicated.bam \
+         --output-stats=deduplicated
+ ```
  
-### Merge UMI metrics into one TSV file
+ ### Merge UMI metrics into one TSV file
  
-```
-         umiMetrics=(~{sep=" " umiMetrics})
-         length=${#umiMetrics[@]}
+ ```
+         set -euo pipefail
  
+         umiCountsPerPositions=(~{sep=" " umiCountsPerPositions})
+         length=${#umiCountsPerPositions[@]}
+         touch umi.tsv
          i=0
- 
-         awk 'NR==1' ${umiMetrics[i]} > mergedUMIMetrics.tsv
-         while [ $i -le $length ]
+         while [ $i -lt $length ]
          do
-             gawk -i inplace '(NR>1) { match($7, "([ACTG.])+") ;  $9=RLENGTH-1"."$9 ; print}' ${umiMetrics[i]}
-     
-             cat ${umiMetrics[i]} >> mergedUMIMetrics.tsv
+             cat umi.tsv > tmp.tsv
+             awk  '{s2[$1]+=$2; s3[$1]+=$3} \
+             END {for (k in s2) print k"\t"s2[k]"\t"s3[k]}' \
+             tmp.tsv <(tail -n +2 ${umiCountsPerPositions[i]}) > umi.tsv
              i=$(( $i+1 ))
          done
-         tr -s '[ ,     ]' '\t' < mergedUMIMetrics.tsv > tmp.tsv && mv tmp.tsv mergedUMIMetrics.tsv 
-```
-### Merge deduplicated BAM files
+         cat <(head -n 1 ${umiCountsPerPositions[0]}) umi.tsv > ~{outputPrefix}.umiCountsPerPosition.tsv
+ ```
+ ### Merge deduplicated BAM files
  
-```        
-         set -euo pipefail
-         samtools merge -c ~{outputPrefix}.dedup.bam ~{sep=" " umiDedupBams}
-``` 
+ ```        
+        set -euo pipefail
+        samtools merge -c ~{outputPrefix}.dedup.bam ~{sep=" " umiDedupBams}
+ ``` 
 ## Support
 
 For support, please file an issue on the [Github project](https://github.com/oicr-gsi) or send an email to gsi@oicr.on.ca .
+
+_Generated with generate-markdown-readme (https://github.com/oicr-gsi/gsi-wdl-tools/)_

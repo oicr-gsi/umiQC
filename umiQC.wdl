@@ -222,21 +222,20 @@ task getUMILengths {
   }
 
   command <<<
+    k=($(awk '{ match($1, "([ACTG])+"); print RLENGTH }' ~{umiList} | uniq))
 
-      k=($(awk '{ match($1, "([ACTG])+"); print RLENGTH }' ~{umiList} | uniq))
+    for i in ${k[@]}
+    do
+        for j in ${k[@]}
+        do
+            # adding 1 to account for period in UMI
+            # 'ATG.ATCG'
+            L+=($(($i+$j+1)))
+        done
+    done
 
-      for i in ${k[@]}
-      do
-          for j in ${k[@]}
-          do
-              # adding 1 to account for period in UMI
-              # 'ATG.ATCG'
-              L+=($(($i+$j+1)))
-          done
-      done
-
-      umiLengths=($(tr ' ' '\n' <<< "${L[@]}" | awk '!u[$0]++' | tr ' ' '\n'))
-      printf "%s\n" "${umiLengths[@]}"
+    umiLengths=($(tr ' ' '\n' <<< "${L[@]}" | awk '!u[$0]++' | tr ' ' '\n'))
+    printf "%s\n" "${umiLengths[@]}"
 
   >>>
 
@@ -345,12 +344,12 @@ task bamSplitDeduplication {
 
     command <<<
         samtools view -H ~{bamFile} > ~{outputPrefix}.~{umiLength}.sam
-        samtools view ~{bamFile} | grep -P "^.*__\S{~{umiLength}}\t" >> ~{outputPrefix}.~{umiLength}.sam
+        samtools view -F 2304 ~{bamFile} | grep -P "^.*__\S{~{umiLength}}\t" >> ~{outputPrefix}.~{umiLength}.sam
         samtools view -Sb ~{outputPrefix}.~{umiLength}.sam > ~{outputPrefix}.~{umiLength}.bam
 
         samtools index ~{outputPrefix}.~{umiLength}.bam
 
-        umi_tools dedup -I ~{outputPrefix}.~{umiLength}.bam \
+        umi_tools dedup --paired -I ~{outputPrefix}.~{umiLength}.bam \
         -S deduplicated.bam \
         --output-stats=deduplicated 
     >>>
