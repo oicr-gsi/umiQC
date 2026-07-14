@@ -735,7 +735,7 @@ task downsampleRegion {
     # ensure BAM file and index are symlinked to working directory
     ln -s ~{bamFile}
     ln -s ~{bamIndex}
-    samtools view -b -h ~{bamFileName} ~{region} > ~{resultName}
+    samtools view -M -b -h ~{bamFileName} ~{region} > ~{resultName}
     >>>
 
     runtime {
